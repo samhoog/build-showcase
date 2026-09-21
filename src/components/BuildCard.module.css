@@ -16,6 +16,28 @@
   cursor: pointer;
 }
 
+.open {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.3em 0.6em;
+  background: var(--fog);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  /* the canvas underneath takes the click */
+  pointer-events: none;
+}
+
+/* the whole card answers a hover, not just the badge */
+.card:hover .open,
+.card:focus-within .open {
+  background: var(--lapis);
+  color: #fff;
+}
+
 .note {
   position: absolute;
   left: var(--space-3);

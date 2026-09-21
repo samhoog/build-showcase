@@ -11,8 +11,9 @@ import styles from './BuildCard.module.css'
 type Status = 'waiting' | 'loading' | 'ready' | 'error'
 type Props = { player: Player; build: Build; coBuilders: Player[]; featured?: boolean }
 
-// A build as a live, slowly turning 3D card. Mouse users can drag it round in place;
-// a click or tap (or Enter on the title) opens it full screen.
+// A build as a live 3D card. Mouse users can drag it round in place; a click or tap (or
+// Enter on the title) opens it full screen. Nothing moves until someone moves it, so the
+// "Open" badge is what says the picture is interactive.
 export function BuildCard({ player, build, coBuilders, featured = false }: Props) {
   const cardRef = useRef<HTMLElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -97,6 +98,23 @@ export function BuildCard({ player, build, coBuilders, featured = false }: Props
           />
         ) : (
           <p className={styles.note}>This browser can't show 3D (WebGL is off).</p>
+        )}
+        {status === 'ready' && (
+          // decorative: the title link below is the accessible way in, and clicks pass
+          // through to the canvas
+          <span className={styles.open} aria-hidden="true">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+            >
+              <path d="M8.5 1.5h4v4M12.5 1.5 8 6M5.5 12.5h-4v-4M1.5 12.5 6 8" />
+            </svg>
+            Open
+          </span>
         )}
         {status === 'loading' && <p className={styles.note}>Loading {build.title}…</p>}
         {status === 'error' && (
