@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import type { StartView } from '../../shared/manifest.ts'
 import { assetUrl, type Build, formatSize, type Player } from '../data/manifest.ts'
 import { Stage } from '../stage/Stage.ts'
 import { useViewport } from '../stage/useViewport.ts'
@@ -21,7 +22,16 @@ export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
   const [status, setStatus] = useState<Status>('loading')
   const [attempt, setAttempt] = useState(0)
   const [touched, setTouched] = useState(false)
+  // camera readout for setting a build's starting view: ?camera in the URL or the C key
+  const [readout, setReadout] = useState(() => new URLSearchParams(location.search).has('camera'))
+  const readoutRef = useRef(readout)
+  const [camera, setCamera] = useState<StartView | null>(null)
   const url = assetUrl(build.file, build.hash)
+
+  useEffect(() => {
+    readoutRef.current = readout
+    if (readout) setCamera(viewRef.current?.describeView() ?? null)
+  }, [readout])
 
   // a modal dialog brings the focus trap, Esc to close and an inert page behind for free
   useEffect(() => {
@@ -42,6 +52,9 @@ export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
       const view = new BuildView(viewport, { fullControls: true, allowTouch: true })
       viewRef.current = view
       view.controls.addEventListener('start', () => setTouched(true))
+      view.controls.addEventListener('change', () => {
+        if (readoutRef.current) setCamera(view.describeView())
+      })
       Stage.get().setExclusive(viewport)
       return () => {
         view.dispose()
@@ -60,8 +73,9 @@ export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
     acquireBuild(url).then(
       (model) => {
         if (cancelled) return
-        view.show(model)
+        view.show(model, build.view)
         setStatus('ready')
+        if (readoutRef.current) setCamera(view.describeView())
       },
       () => {
         if (!cancelled) setStatus('error')
@@ -72,12 +86,15 @@ export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
       cancelled = true
       releaseBuild(url)
     }
-  }, [url, attempt])
+  }, [url, attempt, build.view])
 
   const onKeyDown = (event: React.KeyboardEvent) => {
     const view = viewRef.current
-    // leave keys alone while a button has focus, so Space and Enter still press it
-    if (!view || (event.target as HTMLElement).tagName === 'BUTTON') return
+    if (!view) return
+    // the readout toggle works wherever focus is; it is no key a button would use
+    if (event.key === 'c') return setReadout((on) => !on)
+    // leave the rest alone while a button has focus, so Space and Enter still press it
+    if ((event.target as HTMLElement).tagName === 'BUTTON') return
     const moves: Record<string, () => void> = {
       ArrowLeft: () => view.nudge(-STEP, 0),
       ArrowRight: () => view.nudge(STEP, 0),
@@ -124,6 +141,25 @@ export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
           Reset view
         </button>
       </div>
+
+      {readout && camera && (
+        <div className={styles.readout}>
+          <p>
+            Starting view for <code>build.json</code>:
+          </p>
+          <pre>{`"view": ${JSON.stringify(camera)}`}</pre>
+          <button
+            type="button"
+            className={styles.button}
+            onClick={() => navigator.clipboard?.writeText(`"view": ${JSON.stringify(camera)}`)}
+          >
+            Copy
+          </button>
+          <button type="button" className={styles.button} onClick={() => setReadout(false)}>
+            Hide
+          </button>
+        </div>
+      )}
 
       <div className={styles.caption}>
         <h2 id="viewer-title" className={styles.title}>
