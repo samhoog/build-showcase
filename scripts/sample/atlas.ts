@@ -19,8 +19,9 @@ function mulberry32(seed: number) {
 // flat colour with per-pixel brightness noise
 function speckle(r: number, g: number, b: number, amount: number, a = 255): Painter {
   return (_x, _y, n) => {
+    // clamp: a byte would wrap a too-bright channel round to near zero
     const k = 1 + (n - 0.5) * amount
-    return [r * k, g * k, b * k, a]
+    return [Math.min(r * k, 255), Math.min(g * k, 255), Math.min(b * k, 255), a]
   }
 }
 
@@ -37,8 +38,10 @@ const PAINTERS: Record<string, Painter> = {
     const mortar = (x + (y >> 2) * 3) % 5 === 0 || y % 4 === 0
     return mortar ? speckle(84, 84, 84, 0.2)(x, y, n) : speckle(136, 136, 136, 0.25)(x, y, n)
   },
-  planks: (x, y, n) => (y % 4 === 3 ? speckle(120, 94, 54, 0.1) : speckle(172, 138, 84, 0.12))(x, y, n),
-  log_side: (x, y, n) => (x % 4 === 0 ? speckle(74, 56, 32, 0.15) : speckle(104, 82, 50, 0.18))(x, y, n),
+  planks: (x, y, n) =>
+    (y % 4 === 3 ? speckle(120, 94, 54, 0.1) : speckle(172, 138, 84, 0.12))(x, y, n),
+  log_side: (x, y, n) =>
+    (x % 4 === 0 ? speckle(74, 56, 32, 0.15) : speckle(104, 82, 50, 0.18))(x, y, n),
   log_top: (x, y, n) => {
     const ring = Math.max(Math.abs(x - 7.5), Math.abs(y - 7.5))
     if (ring > 6.5) return speckle(104, 82, 50, 0.15)(x, y, n)
