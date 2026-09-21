@@ -5,14 +5,15 @@ import { Stage, type Viewport } from '../stage/Stage.ts'
 import { useViewport } from '../stage/useViewport.ts'
 import { acquireBuild, releaseBuild } from '../three/buildCache.ts'
 import { BuildView } from '../three/buildView.ts'
+import { BuiltWith } from './BuiltWith.tsx'
 import styles from './BuildCard.module.css'
 
 type Status = 'waiting' | 'loading' | 'ready' | 'error'
-type Props = { player: Player; build: Build; featured?: boolean }
+type Props = { player: Player; build: Build; coBuilders: Player[]; featured?: boolean }
 
 // A build as a live, slowly turning 3D card. Mouse users can drag it round in place;
 // a click or tap (or Enter on the title) opens it full screen.
-export function BuildCard({ player, build, featured = false }: Props) {
+export function BuildCard({ player, build, coBuilders, featured = false }: Props) {
   const cardRef = useRef<HTMLElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const viewRef = useRef<BuildView | null>(null)
@@ -113,6 +114,11 @@ export function BuildCard({ player, build, featured = false }: Props) {
         </Link>
       </h2>
       <p className={styles.size}>{formatSize(build.size)}</p>
+      {coBuilders.length > 0 && (
+        <p className={styles.credit}>
+          <BuiltWith players={coBuilders} />
+        </p>
+      )}
       {build.description && <p className={styles.description}>{build.description}</p>}
     </article>
   )

@@ -71,6 +71,11 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* the caption ignores the pointer so drags reach the canvas; its links still need it */
+.meta a {
+  pointer-events: auto;
+}
+
 .hint {
   margin-top: var(--space-2);
   font-size: var(--text-sm);

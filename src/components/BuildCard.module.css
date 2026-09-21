@@ -53,6 +53,14 @@
   font-variant-numeric: tabular-nums;
 }
 
+.credit {
+  font-size: var(--text-sm);
+}
+
+.credit a:hover {
+  color: var(--lapis);
+}
+
 .description {
   max-width: 60ch;
   margin-top: var(--space-1);

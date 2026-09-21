@@ -4,15 +4,16 @@ import { Stage } from '../stage/Stage.ts'
 import { useViewport } from '../stage/useViewport.ts'
 import { acquireBuild, releaseBuild } from '../three/buildCache.ts'
 import { BuildView } from '../three/buildView.ts'
+import { BuiltWith } from './BuiltWith.tsx'
 import styles from './BuildViewer.module.css'
 
 type Status = 'loading' | 'ready' | 'error'
-type Props = { player: Player; build: Build; onClose: () => void }
+type Props = { player: Player; build: Build; coBuilders: Player[]; onClose: () => void }
 
 const STEP = Math.PI / 24
 
 // One build, full screen: orbit, zoom and pan by mouse, touch or keyboard
-export function BuildViewer({ player, build, onClose }: Props) {
+export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const viewRef = useRef<BuildView | null>(null)
@@ -147,6 +148,7 @@ export function BuildViewer({ player, build, onClose }: Props) {
         </h2>
         <p className={styles.meta}>
           {formatSize(build.size)}, by {player.displayName}
+          <BuiltWith players={coBuilders} lead=" with" />
         </p>
         {status === 'loading' && <p>Loading…</p>}
         {status === 'error' && (
