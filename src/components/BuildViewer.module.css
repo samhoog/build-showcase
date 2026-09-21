@@ -1,0 +1,91 @@
+.viewer {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: linear-gradient(var(--sky), var(--horizon));
+  color: var(--obsidian);
+  outline: none;
+}
+
+.canvas {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+}
+
+.canvas:active {
+  cursor: grabbing;
+}
+
+/* the canvas fills the dialog, so its focus ring has to sit inside the edge */
+.canvas:focus-visible {
+  outline-offset: -6px;
+}
+
+.bar {
+  position: absolute;
+  top: max(var(--space-3), env(safe-area-inset-top));
+  left: max(var(--space-3), env(safe-area-inset-left));
+  right: max(var(--space-3), env(safe-area-inset-right));
+  display: flex;
+  gap: var(--space-2);
+  pointer-events: none;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.button {
+  min-height: 2.75rem;
+  padding: 0 var(--space-3);
+  border: 0;
+  background: var(--fog);
+  font-weight: 600;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.button:hover {
+  background: #fff;
+}
+
+.caption {
+  position: absolute;
+  left: max(var(--space-3), env(safe-area-inset-left));
+  right: max(var(--space-3), env(safe-area-inset-right));
+  bottom: max(var(--space-3), env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+
+.title {
+  font-size: var(--text-xl);
+}
+
+.meta {
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.hint {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--lapis);
+  text-decoration: underline;
+  cursor: pointer;
+  pointer-events: auto;
+}
