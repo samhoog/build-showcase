@@ -57,7 +57,8 @@ test('home page lines up every player as a link with a 3D figure', async ({ page
   await expect(page.getByRole('heading', { level: 1, name: 'Who built what' })).toBeVisible()
 
   const jeb = page.getByRole('link', { name: /jeb_.*3 builds/ })
-  const notch = page.getByRole('link', { name: /Notch.*2 builds/ })
+  // Notch has two builds of his own plus the bridge he shared with jeb_
+  const notch = page.getByRole('link', { name: /Notch.*3 builds/ })
   await expect(jeb).toBeVisible()
   await expect(notch).toBeVisible()
   await expectDrawn(jeb.locator('canvas'))
@@ -80,6 +81,41 @@ test('player page shows each build as a live card', async ({ page }) => {
   // cards further down load as they are scrolled towards
   await cards.last().scrollIntoViewIfNeeded()
   await expectDrawn(cards.last().locator('canvas'))
+})
+
+test("a shared build shows on every builder's page, credits the others, and is one file", async ({
+  page,
+}) => {
+  const downloads: string[] = []
+  page.on('request', (request) => {
+    if (request.url().includes('stone-bridge.glb')) downloads.push(request.url())
+  })
+
+  await page.goto('/')
+  // five sample builds, even though the bridge is listed under two players
+  await expect(page.getByText('2 players, 5 builds')).toBeVisible()
+
+  await page.goto('/p/jeb_')
+  const onJeb = page.getByRole('article').filter({ hasText: 'Stone bridge' })
+  await expect(onJeb).toContainText('Built with Notch')
+  await expectDrawn(onJeb.locator('canvas'))
+
+  // the credit is a link to the other builder, whose page lists the same build
+  await onJeb.getByRole('link', { name: 'Notch' }).click()
+  await expect(page).toHaveURL(/\/p\/Notch$/)
+  const onNotch = page.getByRole('article').filter({ hasText: 'Stone bridge' })
+  await expect(onNotch).toContainText('Built with jeb_')
+  await expectDrawn(onNotch.locator('canvas'))
+  await expect(page.getByRole('article')).toHaveCount(3)
+
+  // and it opens under his URL too, crediting jeb_
+  await onNotch.getByRole('link', { name: 'Stone bridge' }).click()
+  await expect(page).toHaveURL(/\/p\/Notch\/stone-bridge$/)
+  await expect(page.getByRole('dialog')).toContainText('by Notch with jeb_')
+
+  // both pages showed it, but the model came down once
+  expect(new Set(downloads).size).toBe(1)
+  expect(downloads).toHaveLength(1)
 })
 
 test('cards turn on their own', async ({ page }) => {
