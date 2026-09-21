@@ -1,5 +1,5 @@
 import { PerspectiveCamera, Scene, WebGLRenderer } from 'three'
-import { frameDelta } from './frameDelta.ts'
+import { frameDelta, restUntil } from './frameDelta.ts'
 
 // One WebGL context for the whole site.
 //
@@ -54,6 +54,8 @@ export class Stage {
   private frame = 0
   // timestamp of the previous frame, null while the loop is asleep
   private lastFrame: number | null = null
+  // no drawing before this timestamp: see restUntil()
+  private restingUntil = 0
   private bufferWidth = 0
   private bufferHeight = 0
 
@@ -154,14 +156,26 @@ export class Stage {
     const dt = frameDelta(now, this.lastFrame)
     this.lastFrame = now
 
+    // animation always advances, but drawing waits out the rest earned by the last frame
+    const resting = now < this.restingUntil
     let active = false
+    let drawMs = 0
     const targets = this.exclusive ? [this.exclusive] : this.viewports
     for (const viewport of targets) {
       if (!viewport.visible || viewport.width === 0) continue
       const animating = viewport.onFrame?.(dt) ?? false
-      if (animating || viewport.dirty) this.draw(viewport)
-      active ||= animating
+      if (animating || viewport.dirty) {
+        if (resting) {
+          viewport.dirty = true
+        } else {
+          const started = performance.now()
+          this.draw(viewport)
+          drawMs += performance.now() - started
+        }
+      }
+      active ||= animating || viewport.dirty
     }
+    if (drawMs > 0) this.restingUntil = restUntil(now, drawMs, this.exclusive !== null)
 
     // sleep when nothing is moving; invalidate() or a visibility change wakes it again
     if (active) this.wake()
