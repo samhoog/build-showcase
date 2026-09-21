@@ -21,10 +21,6 @@
   touch-action: none;
 }
 
-.canvas:active {
-  cursor: grabbing;
-}
-
 /* the canvas fills the dialog, so its focus ring has to sit inside the edge */
 .canvas:focus-visible {
   outline-offset: -6px;

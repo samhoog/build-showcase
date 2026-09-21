@@ -49,13 +49,18 @@ export class BuildView {
     this.controls.maxPolarAngle = Math.PI * 0.55
     // OrbitControls claims every touch gesture; give vertical scrolling back on cards
     if (!options.allowTouch) canvas.style.touchAction = 'pan-y'
+    // it also leaves an inline `cursor: auto` behind, which would beat the stylesheet's
+    // pointer (cards) and grab (viewer) hands
+    canvas.style.cursor = ''
 
     this.controls.addEventListener('start', () => {
       this.dragging = true
+      canvas.style.cursor = 'grabbing'
     })
     this.controls.addEventListener('end', () => {
       this.dragging = false
       this.idleFor = 0
+      canvas.style.cursor = ''
     })
     this.controls.addEventListener('change', () => viewport.invalidate())
 
