@@ -17,12 +17,14 @@ export function findBuild(
   return manifest?.players.find((p) => p.username === username)?.builds.find((b) => b.slug === slug)
 }
 
-// players A-Z ignoring case; builds newest first, undated ones last, then by title
+// players with the most builds first, ties A-Z ignoring case;
+// builds newest first, undated ones last, then by title
 export function sortManifest(players: Player[]): Player[] {
-  const byName = (a: Player, b: Player) =>
+  const byBuildCount = (a: Player, b: Player) =>
+    b.builds.length - a.builds.length ||
     a.username.toLowerCase().localeCompare(b.username.toLowerCase())
   const byDate = (a: Build, b: Build) =>
     (b.builtOn ?? '').localeCompare(a.builtOn ?? '') || a.title.localeCompare(b.title)
 
-  return players.map((p) => ({ ...p, builds: [...p.builds].sort(byDate) })).sort(byName)
+  return players.map((p) => ({ ...p, builds: [...p.builds].sort(byDate) })).sort(byBuildCount)
 }

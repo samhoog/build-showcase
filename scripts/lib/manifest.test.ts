@@ -20,7 +20,16 @@ function player(username: string, builds: Build[] = []): Player {
 }
 
 describe('sortManifest', () => {
-  it('orders players by name without caring about case', () => {
+  it('puts the players with the most builds first', () => {
+    const sorted = sortManifest([
+      player('alex', [build('a')]),
+      player('jeb_', [build('a'), build('b'), build('c')]),
+      player('Notch', [build('a'), build('b')]),
+    ])
+    expect(sorted.map((p) => p.username)).toEqual(['jeb_', 'Notch', 'alex'])
+  })
+
+  it('breaks ties by name without caring about case', () => {
     const sorted = sortManifest([player('jeb_'), player('Notch'), player('alex')])
     expect(sorted.map((p) => p.username)).toEqual(['alex', 'jeb_', 'Notch'])
   })
