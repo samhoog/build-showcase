@@ -1,0 +1,237 @@
+import { expect, type Locator, type Page, test } from '@playwright/test'
+
+type Counted = { webglContexts: number }
+
+// Share of a canvas's pixels that have been drawn on. Canvases are transparent until the
+// Stage copies a rendered frame into them, so anything above zero means 3D made it to screen.
+async function inkOf(canvas: Locator): Promise<number> {
+  return canvas.evaluate((el: HTMLCanvasElement) => {
+    const { data } = el.getContext('2d')!.getImageData(0, 0, el.width, el.height)
+    let drawn = 0
+    for (let i = 3; i < data.length; i += 4) if (data[i] > 0) drawn++
+    return drawn / (data.length / 4)
+  })
+}
+
+// The canvas's own pixels, without the page furniture (captions, focus rings) laid over it
+async function pixelsOf(canvas: Locator): Promise<string> {
+  return canvas.evaluate((el: HTMLCanvasElement) => el.toDataURL())
+}
+
+async function expectDrawn(canvas: Locator) {
+  await expect.poll(() => inkOf(canvas), { timeout: 15_000 }).toBeGreaterThan(0.02)
+}
+
+async function expectNoSidewaysScroll(page: Page) {
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  )
+  expect(overflow).toBeLessThanOrEqual(0)
+}
+
+async function open(canvas: Locator, isMobile: boolean) {
+  if (isMobile) await canvas.tap()
+  else await canvas.click()
+}
+
+// count every canvas that is handed a WebGL context, across the whole visit
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    const counter = window as unknown as Counted
+    counter.webglContexts = 0
+    const original = HTMLCanvasElement.prototype.getContext as (
+      this: HTMLCanvasElement,
+      type: string,
+      ...rest: unknown[]
+    ) => unknown
+    HTMLCanvasElement.prototype.getContext = function (type: string, ...rest: unknown[]) {
+      const context = original.call(this, type, ...rest)
+      if (context && type.startsWith('webgl')) counter.webglContexts++
+      return context
+    } as typeof HTMLCanvasElement.prototype.getContext
+  })
+})
+
+test('home page lines up every player as a link with a 3D figure', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByRole('heading', { level: 1, name: 'Who built what' })).toBeVisible()
+
+  const jeb = page.getByRole('link', { name: /jeb_.*3 builds/ })
+  const notch = page.getByRole('link', { name: /Notch.*2 builds/ })
+  await expect(jeb).toBeVisible()
+  await expect(notch).toBeVisible()
+  await expectDrawn(jeb.locator('canvas'))
+  await expectDrawn(notch.locator('canvas'))
+  await expectNoSidewaysScroll(page)
+})
+
+test('player page shows each build as a live card', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('link', { name: /jeb_/ }).click()
+  await expect(page).toHaveURL(/\/p\/jeb_$/)
+
+  const cards = page.getByRole('article')
+  await expect(cards).toHaveCount(3)
+  await expect(cards.first().getByRole('heading')).toHaveText('Stone bridge')
+  await expect(cards.first()).toContainText('29 × 11 × 11 blocks')
+  await expectDrawn(cards.first().locator('canvas'))
+  await expectNoSidewaysScroll(page)
+
+  // cards further down load as they are scrolled towards
+  await cards.last().scrollIntoViewIfNeeded()
+  await expectDrawn(cards.last().locator('canvas'))
+})
+
+test('cards turn on their own', async ({ page }) => {
+  await page.goto('/p/Notch')
+  const canvas = page.getByRole('article').first().locator('canvas')
+  await expectDrawn(canvas)
+  const before = await pixelsOf(canvas)
+  await page.waitForTimeout(3500)
+  expect(await pixelsOf(canvas)).not.toBe(before)
+})
+
+test('cards stay still for people who prefer reduced motion', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/p/Notch')
+  const canvas = page.getByRole('article').first().locator('canvas')
+  await expectDrawn(canvas)
+  await page.waitForTimeout(500)
+  const before = await pixelsOf(canvas)
+  await page.waitForTimeout(3500)
+  expect(await pixelsOf(canvas)).toBe(before)
+})
+
+test('a card opens the fullscreen viewer, and Escape or Back closes it', async ({
+  page,
+  isMobile,
+}) => {
+  await page.goto('/p/jeb_')
+  const canvas = page.getByRole('article').first().locator('canvas')
+  await expectDrawn(canvas)
+  await open(canvas, isMobile)
+
+  await expect(page).toHaveURL(/\/p\/jeb_\/stone-bridge$/)
+  const viewer = page.getByRole('dialog', { name: 'Stone bridge' })
+  await expect(viewer).toBeVisible()
+  await expect(viewer.getByRole('button', { name: 'Close' })).toBeFocused()
+  await expectDrawn(viewer.locator('canvas'))
+
+  await page.keyboard.press('Escape')
+  await expect(viewer).toBeHidden()
+  await expect(page).toHaveURL(/\/p\/jeb_$/)
+
+  // and the browser's Back button closes it too
+  await page.getByRole('link', { name: 'Watchtower' }).click()
+  await expect(page.getByRole('dialog', { name: 'Watchtower' })).toBeVisible()
+  await page.goBack()
+  await expect(page.getByRole('dialog')).toBeHidden()
+})
+
+test('a build link opens straight into the viewer', async ({ page }) => {
+  await page.goto('/p/jeb_/watchtower')
+  const viewer = page.getByRole('dialog', { name: 'Watchtower' })
+  await expect(viewer).toBeVisible()
+  await expect(viewer).toContainText('19 × 29 × 19 blocks, by jeb_')
+  await expectDrawn(viewer.locator('canvas'))
+
+  await viewer.getByRole('button', { name: 'Close' }).click()
+  await expect(page).toHaveURL(/\/p\/jeb_$/)
+  await expect(page.getByRole('article')).toHaveCount(3)
+})
+
+test('dragging a card with the mouse orbits it instead of opening it', async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, 'touch never orbits a card')
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/p/jeb_')
+  const canvas = page.getByRole('article').first().locator('canvas')
+  await expectDrawn(canvas)
+  await page.waitForTimeout(500)
+  const before = await pixelsOf(canvas)
+
+  const box = (await canvas.boundingBox())!
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width / 2 + 200, box.y + box.height / 2 + 30, { steps: 8 })
+  await page.mouse.up()
+  await page.waitForTimeout(800)
+
+  await expect(page).toHaveURL(/\/p\/jeb_$/)
+  expect(await pixelsOf(canvas)).not.toBe(before)
+})
+
+test('keyboard turns and resets the build in the viewer', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/p/jeb_/island-oak')
+  const canvas = page.getByRole('dialog').locator('canvas')
+  await expectDrawn(canvas)
+  await page.waitForTimeout(500)
+  const start = await pixelsOf(canvas)
+
+  await canvas.focus()
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowLeft')
+  await page.waitForTimeout(800)
+  expect(await pixelsOf(canvas)).not.toBe(start)
+
+  await page.keyboard.press('r')
+  await page.waitForTimeout(800)
+  expect(await pixelsOf(canvas)).toBe(start)
+})
+
+test('touch scrolling is left to the page on cards, and taken over in the viewer', async ({
+  page,
+}) => {
+  await page.goto('/p/jeb_')
+  const card = page.getByRole('article').first().locator('canvas')
+  await expectDrawn(card)
+  await expect(card).toHaveCSS('touch-action', 'pan-y')
+
+  await page.goto('/p/jeb_/watchtower')
+  await expect(page.getByRole('dialog').locator('canvas')).toHaveCSS('touch-action', 'none')
+})
+
+test('the whole visit uses a single WebGL context', async ({ page, isMobile }) => {
+  await page.goto('/')
+  await expectDrawn(page.getByRole('link', { name: /jeb_/ }).locator('canvas'))
+  await page.getByRole('link', { name: /jeb_/ }).click()
+  const canvas = page.getByRole('article').first().locator('canvas')
+  await expectDrawn(canvas)
+  await open(canvas, isMobile)
+  await expectDrawn(page.getByRole('dialog').locator('canvas'))
+
+  // 2 figures, then 1 figure + 3 cards, then the viewer: all through one context
+  expect(await page.evaluate(() => (window as unknown as Counted).webglContexts)).toBe(1)
+})
+
+test('an unknown player gets a specific message and a way back', async ({ page }) => {
+  await page.goto('/p/Herobrine')
+  await expect(page.getByRole('heading', { name: 'No player called Herobrine' })).toBeVisible()
+  await page.getByRole('link', { name: 'See all players' }).click()
+  await expect(page).toHaveURL(/\/$/)
+})
+
+test('an unknown build says so and still lists the rest', async ({ page }) => {
+  await page.goto('/p/jeb_/nether-portal')
+  await expect(page.getByRole('alert')).toContainText('jeb_ has no build called "nether-portal"')
+  await expect(page.getByRole('article')).toHaveCount(3)
+})
+
+test('with nothing converted yet, the page explains how to add builds', async ({ page }) => {
+  await page.route('**/builds/manifest.json', (route) => route.fulfill({ status: 404 }))
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: 'No builds yet' })).toBeVisible()
+  await expect(page.getByText('npm run convert').first()).toBeVisible()
+})
+
+test('a failed download can be retried', async ({ page }) => {
+  let fail = true
+  await page.route('**/builds/manifest.json', (route) => (fail ? route.abort() : route.continue()))
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: "Couldn't load the builds" })).toBeVisible()
+  fail = false
+  await page.getByRole('button', { name: 'Try again' }).click()
+  await expect(page.getByRole('link', { name: /Notch/ })).toBeVisible()
+})
