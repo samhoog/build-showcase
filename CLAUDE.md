@@ -8,7 +8,7 @@ reference and gotchas; read it before changing anything under `src/stage` or `sr
 
 - `scripts/` Node pipeline (TypeScript run natively by Node >= 22.18, so erasable syntax only
   and `.ts` import extensions). `convert.ts` turns Mineways OBJ exports into GLBs + manifest;
-  `sample/` generates stand-in exports.
+  `sample/` generates stand-in exports, as a fixture for the e2e sandbox only.
 - `shared/manifest.ts` the manifest types, imported by both the pipeline and the site.
 - `src/` the site. `stage/` shared WebGL renderer, `three/` scene code with no React,
   `components/` and `pages/` React, `data/` manifest loading, `styles/` tokens and base CSS.
@@ -19,7 +19,7 @@ reference and gotchas; read it before changing anything under `src/stage` or `sr
 
 - `npm run check` lint (oxlint) + type-check + unit tests (vitest). Run before every commit.
 - `npm run test:e2e` Playwright, desktop and phone. Builds the site with sample data itself.
-- `npm run format` Prettier. `npm run sample && npm run convert` to get local content.
+- `npm run format` Prettier. `npm run convert` builds local content from `models-src/`.
 
 ## Style
 

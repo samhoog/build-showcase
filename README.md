@@ -17,7 +17,6 @@ Needs Node 22.18 or newer.
 
 ```sh
 npm install
-npm run sample     # generate a few sample builds (skip once you have real ones)
 npm run convert    # models-src/ -> public/builds/*.glb, skins and manifest
 npm run dev
 ```
@@ -44,7 +43,6 @@ also counts as a player, but only `players.json` is committed.)
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `npm run dev`      | dev server                                                                                                                                                                                    |
 | `npm run build`    | type-check and build to `dist/`                                                                                                                                                               |
-| `npm run sample`   | write sample Mineways-style exports into `models-src/`                                                                                                                                        |
 | `npm run convert`  | convert exports to GLB, fetch skins, write the manifest                                                                                                                                       |
 | `npm run check`    | lint, type-check and unit tests                                                                                                                                                               |
 | `npm run test:e2e` | Playwright tests on desktop and phone viewports, against a sandboxed sample site in `.e2e/` so your real players and builds are never touched (first time: `npx playwright install chromium`) |

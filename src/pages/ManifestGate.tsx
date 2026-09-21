@@ -19,10 +19,6 @@ export function ManifestGate({ children }: { children: (manifest: Manifest) => R
             <code>models-src/&lt;username&gt;/&lt;build&gt;/</code>, then run{' '}
             <code>npm run convert</code>.
           </p>
-          <p>
-            To try the site with sample builds first, run <code>npm run sample</code> and then{' '}
-            <code>npm run convert</code>.
-          </p>
         </Notice>
       )}
       {state.status === 'error' && (
