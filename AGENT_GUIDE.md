@@ -81,7 +81,7 @@ runtime; skins are downloaded from Mojang at convert time.
 | `stage/Stage.ts`                           | `Stage` singleton and `Viewport`                                                                                |
 | `stage/useViewport.ts`                     | React hook that registers a canvas with the Stage                                                               |
 | `three/buildView.ts`                       | `BuildView`: lights, OrbitControls, keyboard nudge, reset. No auto-rotate: nothing moves until someone moves it |
-| `three/framing.ts`                         | `Bounds` (upright cylinder), `fitDistance`, `frameBounds`                                                       |
+| `three/framing.ts`                         | `Bounds` (upright cylinder), `fitDistance`, `frameBounds`, `viewDirection` / `viewAngles` (degrees)             |
 | `three/prepareModel.ts`                    | GLTF scene -> Lambert materials with nearest-neighbour textures, bounds, dispose                                |
 | `three/buildCache.ts`, `three/lruCache.ts` | lazy GLB loading, ref-counted LRU                                                                               |
 | `three/playerFigure.ts`                    | skinview3d `PlayerObject` with idle, look-at and wave animation                                                 |
@@ -147,6 +147,9 @@ summing players' lists, and treat every builder the same: there is no visible "o
 - Frame deltas come from `frameDelta()` using consecutive rAF timestamps only. Mixing in
   `performance.now()` drops render time from the delta; on fast displays it went negative and
   every eased animation ran away (figures spinning wildly after a page change).
+- A build's starting camera is `StartView` (angles + zoom relative to the fitted distance,
+  never raw coordinates, so it holds across aspect ratios). `BuildView.describeView()` is
+  the inverse of `resetView()`; the viewer's `C` / `?camera` readout prints it.
 - Usernames are identity: never truncate one. `Nametag` shrinks long names to fit instead.
 - Never resize or lossy-compress textures in the pipeline: it is pixel art.
 - Writing colours into a `Uint8Array` wraps above 255; clamp first (bit the sample atlas).

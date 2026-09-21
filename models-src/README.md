@@ -14,10 +14,21 @@ models-src/
       anything.mtl
       *.png                    whatever textures the .mtl points at
       build.json               optional: { "title": "...", "description": "...", "builtOn": "2026-08-01",
-                                           "builders": ["mason31", "jw01"] }
+                                           "builders": ["mason31", "jw01"],
+                                           "view": { "azimuth": 80, "elevation": 24, "zoom": 1.2 } }
 ```
 
 Then run `npm run convert`. Only builds whose files changed are converted again.
+
+## Choosing where the camera starts
+
+Open the build full screen and press `C` (or add `?camera` to its URL). A panel shows the
+current camera as a `"view"` line that updates as you turn, zoom and pan. When it looks
+right, press Copy and paste the line into the build's `build.json`, then run
+`npm run convert`. The card and the viewer both start from it, and Reset view goes back to
+it. `azimuth` and `elevation` are degrees, `zoom` is relative to the distance at which the
+build just fits (so the view holds on phones too), and `target` only appears if you panned
+away from the centre.
 
 ## Builds with more than one builder
 
