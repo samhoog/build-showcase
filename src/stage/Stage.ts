@@ -1,4 +1,5 @@
 import { PerspectiveCamera, Scene, WebGLRenderer } from 'three'
+import { frameDelta } from './frameDelta.ts'
 
 // One WebGL context for the whole site.
 //
@@ -51,7 +52,8 @@ export class Stage {
   private viewports = new Set<Viewport>()
   private exclusive: Viewport | null = null
   private frame = 0
-  private lastTime = 0
+  // timestamp of the previous frame, null while the loop is asleep
+  private lastFrame: number | null = null
   private bufferWidth = 0
   private bufferHeight = 0
 
@@ -100,6 +102,9 @@ export class Stage {
     this.intersections.unobserve(viewport.canvas)
     this.resizes.unobserve(viewport.canvas)
     if (this.exclusive === viewport) this.setExclusive(null)
+    // Let the buffer shrink to fit whatever is left. Copying out of a canvas costs by its
+    // full size, so figures shouldn't keep paying for a card-sized buffer after a page change.
+    this.bufferWidth = this.bufferHeight = 0
   }
 
   // While set, only this viewport is drawn (the fullscreen viewer), everything else pauses.
@@ -114,10 +119,7 @@ export class Stage {
   }
 
   wake() {
-    if (this.frame === 0 && this.renderer) {
-      this.lastTime = performance.now()
-      this.frame = requestAnimationFrame(this.tick)
-    }
+    if (this.frame === 0 && this.renderer) this.frame = requestAnimationFrame(this.tick)
   }
 
   private find(canvas: Element): Viewport | undefined {
@@ -149,8 +151,8 @@ export class Stage {
 
   private tick = (now: number) => {
     this.frame = 0
-    const dt = Math.min((now - this.lastTime) / 1000, 0.1)
-    this.lastTime = now
+    const dt = frameDelta(now, this.lastFrame)
+    this.lastFrame = now
 
     let active = false
     const targets = this.exclusive ? [this.exclusive] : this.viewports
@@ -163,6 +165,7 @@ export class Stage {
 
     // sleep when nothing is moving; invalidate() or a visibility change wakes it again
     if (active) this.wake()
+    else if (this.frame === 0) this.lastFrame = null
   }
 
   private draw(viewport: Viewport) {
