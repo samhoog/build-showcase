@@ -7,12 +7,13 @@ import {
   type MeshStandardMaterial,
   NearestFilter,
   type Object3D,
-  Sphere,
+  Vector3,
 } from 'three'
+import type { Bounds } from './framing.ts'
 
 export type PreparedModel = {
   object: Object3D
-  bounds: Sphere
+  bounds: Bounds
   dispose: () => void
 }
 
@@ -53,7 +54,13 @@ export function prepareModel(object: Object3D, maxAnisotropy: number): PreparedM
     if (source.transparent) mesh.renderOrder = 1
   })
 
-  const bounds = new Box3().setFromObject(object).getBoundingSphere(new Sphere())
+  const box = new Box3().setFromObject(object)
+  const size = box.getSize(new Vector3())
+  const bounds: Bounds = {
+    center: box.getCenter(new Vector3()),
+    radius: Math.hypot(size.x, size.z) / 2,
+    halfHeight: size.y / 2,
+  }
 
   const dispose = () => {
     for (const mesh of meshes) mesh.geometry.dispose()
