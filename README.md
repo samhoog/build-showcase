@@ -29,19 +29,25 @@ npm run dev
 2. Optionally add a `build.json` with `title`, `description` and `builtOn`.
 3. `npm run convert`.
 
-A new player is just a new username folder. Their skin is downloaded from Mojang.
+## Adding a player
+
+Add their exact Minecraft username to `players.json` and run `npm run convert`. They appear
+in the lineup straight away, with "No builds yet" until they have one. Their skin is
+downloaded from Mojang; a name Mojang doesn't know gets a plain placeholder skin and a
+warning, and is looked up again on every convert. (A username folder under `models-src/`
+also counts as a player, but only `players.json` is committed.)
 
 ## Commands
 
-| Command            | What it does                                                                                    |
-| ------------------ | ----------------------------------------------------------------------------------------------- |
-| `npm run dev`      | dev server                                                                                      |
-| `npm run build`    | type-check and build to `dist/`                                                                 |
-| `npm run sample`   | write sample Mineways-style exports into `models-src/`                                          |
-| `npm run convert`  | convert exports to GLB, fetch skins, write the manifest                                         |
-| `npm run check`    | lint, type-check and unit tests                                                                 |
-| `npm run test:e2e` | Playwright tests on desktop and phone viewports (first time: `npx playwright install chromium`) |
-| `npm run format`   | Prettier                                                                                        |
+| Command            | What it does                                                                                                                                                                                  |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`      | dev server                                                                                                                                                                                    |
+| `npm run build`    | type-check and build to `dist/`                                                                                                                                                               |
+| `npm run sample`   | write sample Mineways-style exports into `models-src/`                                                                                                                                        |
+| `npm run convert`  | convert exports to GLB, fetch skins, write the manifest                                                                                                                                       |
+| `npm run check`    | lint, type-check and unit tests                                                                                                                                                               |
+| `npm run test:e2e` | Playwright tests on desktop and phone viewports, against a sandboxed sample site in `.e2e/` so your real players and builds are never touched (first time: `npx playwright install chromium`) |
+| `npm run format`   | Prettier                                                                                                                                                                                      |
 
 ## Deploying
 

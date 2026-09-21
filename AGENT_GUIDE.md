@@ -55,7 +55,7 @@ cache disposes GPU resources.
 
 ### Data flows one way
 
-`models-src/` -> `npm run convert` -> `public/builds/manifest.json` + GLBs + skins -> the
+`players.json` (committed roster) + `models-src/` -> `npm run convert` -> `public/builds/manifest.json` + GLBs + skins -> the
 site fetches the manifest once (`useManifest`). The site never talks to a third party at
 runtime; skins are downloaded from Mojang at convert time.
 
@@ -104,7 +104,9 @@ must go through `assetUrl()` (it applies `BASE_PATH` and the cache-busting `hash
   `src/three/framing.test.ts`. Pipeline tests build real temp folders rather than mocking
   `fs` (`scripts/lib/scan.test.ts`); `scripts/lib/optimize.test.ts` runs a real conversion.
 - **E2E (Playwright):** `e2e/showcase.spec.ts`, projects `desktop` and `phone` (Pixel 7),
-  against the production build with sample data. Headless WebGL runs on SwiftShader (launch
+  against a production build with sample data. The whole thing is sandboxed in `.e2e/` via
+  `SOURCES_DIR` / `PUBLIC_DIR` / `OUT_DIR` / `ROSTER_FILE` (see `playwright.config.ts`), so the
+  tests know exactly two players (Notch, jeb_) and never touch the real site. Keep it that way. Headless WebGL runs on SwiftShader (launch
   args in `playwright.config.ts`).
 - Compare 3D output with `pixelsOf(canvas)` (the canvas's own pixels), not
   `locator.screenshot()`, which also captures captions and focus rings laid over the canvas.
@@ -137,6 +139,7 @@ must go through `assetUrl()` (it applies `BASE_PATH` and the cache-busting `hash
 - Frame deltas come from `frameDelta()` using consecutive rAF timestamps only. Mixing in
   `performance.now()` drops render time from the delta; on fast displays it went negative and
   every eased animation ran away (figures spinning wildly after a page change).
+- Usernames are identity: never truncate one. `Nametag` shrinks long names to fit instead.
 - Never resize or lossy-compress textures in the pipeline: it is pixel art.
 - Writing colours into a `Uint8Array` wraps above 255; clamp first (bit the sample atlas).
 - The pipeline is verified against generated samples only, not yet a real Mineways export.

@@ -7,7 +7,7 @@ models never go in the repo.
 
 ```
 models-src/
-  <minecraft-username>/        folder name must be the exact username (it is used to fetch the skin)
+  <minecraft-username>/        the username from players.json (case doesn't matter; players.json wins)
     player.json                optional: { "displayName": "Jens" }
     <build-name>/              one folder per build; the name becomes the URL (harbour-lighthouse)
       anything.obj             exactly one .obj per folder
