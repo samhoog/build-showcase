@@ -5,6 +5,7 @@ import { mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { Build, Player } from '../shared/manifest.ts'
 import { findBuild, readManifest, shareBuilds, sortManifest } from './lib/manifest.ts'
+import { readBlockDimensions } from './lib/obj-header.ts'
 import { objToGlb } from './lib/obj-to-glb.ts'
 import { PUBLIC_DIR, ROSTER_FILE, SOURCES_DIR } from './lib/paths.ts'
 import { optimizeGlb } from './lib/optimize.ts'
@@ -45,6 +46,8 @@ async function convertBuild(username: string, source: BuildSource): Promise<Buil
     hash: createHash('sha1').update(glb).digest('hex').slice(0, 8),
     bytes: glb.byteLength,
     ...stats,
+    // Mineways' own count when it gives one, the measured mesh otherwise
+    size: (await readBlockDimensions(source.objPath)) ?? stats.size,
   }
 }
 
@@ -53,7 +56,7 @@ function withOwner(username: string, source: BuildSource): string[] {
   return [username, ...(source.meta.builders ?? [])]
 }
 
-// delete GLBs whose source folder is gone
+// delete what belongs to builds and players that are gone: GLBs, then emptied folders, skins
 async function removeStale(players: Player[]) {
   const keep = new Set(players.flatMap((p) => p.builds.map((b) => join(PUBLIC, b.file))))
   const root = join(PUBLIC, 'builds')
@@ -62,6 +65,18 @@ async function removeStale(players: Player[]) {
     if (entry.isFile() && path.endsWith('.glb') && !keep.has(path)) {
       await rm(path)
       console.log(`  removed ${path}`)
+    }
+  }
+  for (const entry of await readdir(root, { withFileTypes: true })) {
+    const dir = join(root, entry.name)
+    if (entry.isDirectory() && (await readdir(dir)).length === 0) await rm(dir, { recursive: true })
+  }
+
+  const usernames = new Set(players.map((p) => p.username))
+  for (const file of await readdir(join(PUBLIC, 'skins')).catch(() => [])) {
+    if (!usernames.has(file.replace(/\.(png|json)$/, ''))) {
+      await rm(join(PUBLIC, 'skins', file))
+      console.log(`  removed ${join(PUBLIC, 'skins', file)}`)
     }
   }
 }
