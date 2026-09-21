@@ -109,6 +109,7 @@ test('a card opens the fullscreen viewer, and Escape or Back closes it', async (
   await page.goto('/p/jeb_')
   const canvas = page.getByRole('article').first().locator('canvas')
   await expectDrawn(canvas)
+  await expect(canvas).toHaveCSS('cursor', 'pointer')
   await open(canvas, isMobile)
 
   await expect(page).toHaveURL(/\/p\/jeb_\/stone-bridge$/)
@@ -116,6 +117,7 @@ test('a card opens the fullscreen viewer, and Escape or Back closes it', async (
   await expect(viewer).toBeVisible()
   await expect(viewer.getByRole('button', { name: 'Close' })).toBeFocused()
   await expectDrawn(viewer.locator('canvas'))
+  await expect(viewer.locator('canvas')).toHaveCSS('cursor', 'grab')
 
   await page.keyboard.press('Escape')
   await expect(viewer).toBeHidden()
@@ -156,7 +158,9 @@ test('dragging a card with the mouse orbits it instead of opening it', async ({
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
   await page.mouse.down()
   await page.mouse.move(box.x + box.width / 2 + 200, box.y + box.height / 2 + 30, { steps: 8 })
+  await expect(canvas).toHaveCSS('cursor', 'grabbing')
   await page.mouse.up()
+  await expect(canvas).toHaveCSS('cursor', 'pointer')
   await page.waitForTimeout(800)
 
   await expect(page).toHaveURL(/\/p\/jeb_$/)
