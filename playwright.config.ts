@@ -26,7 +26,7 @@ export default defineConfig({
   // entirely in .e2e/ so a test run never touches the real models-src/, public/ or dist/.
   webServer: {
     command:
-      'npm run sample && npm run convert && npm run build && npm run preview -- --port 4183 --strictPort',
+      'node scripts/sample/generate.ts && npm run convert && npm run build && npm run preview -- --port 4183 --strictPort',
     env: {
       SOURCES_DIR: '.e2e/models-src',
       PUBLIC_DIR: '.e2e/public',

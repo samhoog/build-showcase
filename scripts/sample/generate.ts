@@ -1,5 +1,6 @@
-// npm run sample: writes Mineways-style exports into models-src/ so a fresh clone has
-// something to convert and show. Real models are never committed.
+// Test fixture: writes Mineways-style exports for two made-up-content players (Notch, jeb_)
+// into SOURCES_DIR. Only the e2e sandbox runs it (see playwright.config.ts); there is on
+// purpose no npm script, so sample players can never land on the real site.
 import { access, mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { SOURCES_DIR } from '../lib/paths.ts'
