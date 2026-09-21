@@ -14,7 +14,7 @@ export default defineConfig({
   testDir: 'e2e',
   fullyParallel: true,
   reporter: [['list']],
-  use: { baseURL: 'http://localhost:4173', launchOptions },
+  use: { baseURL: 'http://localhost:4183', launchOptions },
   projects: [
     {
       name: 'desktop',
@@ -22,11 +22,19 @@ export default defineConfig({
     },
     { name: 'phone', use: { ...devices['Pixel 7'] } },
   ],
-  // the site under test is the production build, filled with the generated sample builds
+  // The site under test is a production build filled with generated sample builds. It lives
+  // entirely in .e2e/ so a test run never touches the real models-src/, public/ or dist/.
   webServer: {
     command:
-      'npm run sample && npm run convert && npm run build && npm run preview -- --port 4173 --strictPort',
-    url: 'http://localhost:4173',
+      'npm run sample && npm run convert && npm run build && npm run preview -- --port 4183 --strictPort',
+    env: {
+      SOURCES_DIR: '.e2e/models-src',
+      PUBLIC_DIR: '.e2e/public',
+      OUT_DIR: '.e2e/dist',
+      // no roster: the tests know exactly two players, Notch and jeb_
+      ROSTER_FILE: '.e2e/no-roster.json',
+    },
+    url: 'http://localhost:4183',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

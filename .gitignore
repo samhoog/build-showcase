@@ -10,7 +10,8 @@ models-src/*
 public/builds/
 public/skins/
 
-# Playwright
+# Playwright (.e2e is the sandboxed site the tests build)
+.e2e/
 test-results/
 playwright-report/
 e2e/screenshots/
