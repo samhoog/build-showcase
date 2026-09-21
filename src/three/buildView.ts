@@ -1,13 +1,9 @@
 import { type Object3D, Vector3 } from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { reducedMotion } from '../pointer.ts'
 import type { Viewport } from '../stage/Stage.ts'
 import { type Bounds, fitDistance, frameBounds, viewDirection } from './framing.ts'
 import { addDaylight } from './lighting.ts'
 import type { PreparedModel } from './prepareModel.ts'
-
-// seconds of stillness after a drag before a build starts turning again
-const RESUME_AFTER = 2
 
 export type BuildViewOptions = {
   // cards orbit only; the fullscreen viewer can also zoom and pan
@@ -16,14 +12,12 @@ export type BuildViewOptions = {
   allowTouch: boolean
 }
 
-// Scene, camera and orbit controls for one build, shared by the card and the fullscreen viewer
+// Scene, camera and orbit controls for one build, shared by the card and the fullscreen viewer.
 export class BuildView {
   readonly controls: OrbitControls
   private viewport: Viewport
   private model: Object3D | null = null
   private bounds: Bounds = { center: new Vector3(), radius: 1, halfHeight: 1 }
-  private idleFor = 0
-  private rotating = !reducedMotion.matches
   private dragging = false
   private allowTouch: boolean
 
@@ -45,7 +39,6 @@ export class BuildView {
     this.controls.enableDamping = true
     this.controls.enableZoom = options.fullControls
     this.controls.enablePan = options.fullControls
-    this.controls.autoRotateSpeed = 1.4
     this.controls.maxPolarAngle = Math.PI * 0.55
     // OrbitControls claims every touch gesture; give vertical scrolling back on cards
     if (!options.allowTouch) canvas.style.touchAction = 'pan-y'
@@ -59,23 +52,14 @@ export class BuildView {
     })
     this.controls.addEventListener('end', () => {
       this.dragging = false
-      this.idleFor = 0
       canvas.style.cursor = ''
+      // damping eases the camera to a stop over the next few frames
+      viewport.invalidate()
     })
     this.controls.addEventListener('change', () => viewport.invalidate())
 
     viewport.onResize = () => this.reframe()
     viewport.onFrame = (dt) => this.update(dt)
-  }
-
-  get isRotating(): boolean {
-    return this.rotating
-  }
-
-  setRotating(rotating: boolean) {
-    this.rotating = rotating
-    this.idleFor = RESUME_AFTER
-    this.viewport.invalidate()
   }
 
   show(model: PreparedModel) {
@@ -117,7 +101,6 @@ export class BuildView {
     )
     offset.set(Math.sin(phi) * Math.sin(theta), Math.cos(phi), Math.sin(phi) * Math.cos(theta))
     camera.position.copy(this.controls.target).addScaledVector(offset, clamped)
-    this.idleFor = 0
     this.controls.update()
     this.viewport.invalidate()
   }
@@ -148,13 +131,12 @@ export class BuildView {
     camera.updateProjectionMatrix()
   }
 
+  // Nothing moves on its own: a build only turns while someone turns it. Big builds are
+  // slow to draw, and a slow automatic turn reads as lag where a still model reads as a
+  // picture. Keep ticking only while a drag is in progress or damping out.
   private update(dt: number): boolean {
     if (!this.model) return false
-    this.idleFor += dt
-    const turn = this.rotating && !this.dragging && this.idleFor >= RESUME_AFTER
-    this.controls.autoRotate = turn
     const moved = this.controls.update(dt)
-    // keep ticking while turning, easing out of a drag, or counting down to resume
-    return moved || turn || (this.rotating && !this.dragging)
+    return moved || this.dragging
   }
 }
