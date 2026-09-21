@@ -14,7 +14,8 @@
     "typecheck": "tsc -b",
     "format": "prettier --write .",
     "test": "vitest run",
-    "check": "npm run lint && npm run typecheck && npm run test"
+    "check": "npm run lint && npm run typecheck && npm run test",
+    "sample": "node scripts/sample/generate.ts"
   },
   "dependencies": {
     "react": "^19.3.0",
