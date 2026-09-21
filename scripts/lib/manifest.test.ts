@@ -3,7 +3,16 @@ import type { Build, Player } from '../../shared/manifest.ts'
 import { sortManifest } from './manifest.ts'
 
 function build(title: string, builtOn?: string): Build {
-  return { slug: title, title, builtOn, file: '', hash: '', bytes: 0, triangles: 0, size: [1, 1, 1] }
+  return {
+    slug: title,
+    title,
+    builtOn,
+    file: '',
+    hash: '',
+    bytes: 0,
+    triangles: 0,
+    size: [1, 1, 1],
+  }
 }
 
 function player(username: string, builds: Build[] = []): Player {

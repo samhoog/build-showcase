@@ -14,9 +14,9 @@ async function getJson(url: string): Promise<unknown> {
 
 // username -> uuid -> profile -> skin texture, all from Mojang's own API
 export async function fetchSkin(username: string): Promise<Skin> {
-  const { id } = (await getJson(
-    `https://api.mojang.com/users/profiles/minecraft/${username}`,
-  )) as { id: string }
+  const { id } = (await getJson(`https://api.mojang.com/users/profiles/minecraft/${username}`)) as {
+    id: string
+  }
   const profile = (await getJson(
     `https://sessionserver.mojang.com/session/minecraft/profile/${id}`,
   )) as { properties: { name: string; value: string }[] }

@@ -36,12 +36,66 @@ type Face = {
 const side = (b: Block) => b.side
 
 const FACES: Face[] = [
-  { normal: [1, 0, 0], tile: side, corners: [[1, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1]] },
-  { normal: [-1, 0, 0], tile: side, corners: [[0, 0, 0], [0, 0, 1], [0, 1, 1], [0, 1, 0]] },
-  { normal: [0, 0, 1], tile: side, corners: [[0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]] },
-  { normal: [0, 0, -1], tile: side, corners: [[1, 0, 0], [0, 0, 0], [0, 1, 0], [1, 1, 0]] },
-  { normal: [0, 1, 0], tile: (b) => b.top, corners: [[0, 1, 1], [1, 1, 1], [1, 1, 0], [0, 1, 0]] },
-  { normal: [0, -1, 0], tile: (b) => b.bottom, corners: [[0, 0, 0], [1, 0, 0], [1, 0, 1], [0, 0, 1]] },
+  {
+    normal: [1, 0, 0],
+    tile: side,
+    corners: [
+      [1, 0, 1],
+      [1, 0, 0],
+      [1, 1, 0],
+      [1, 1, 1],
+    ],
+  },
+  {
+    normal: [-1, 0, 0],
+    tile: side,
+    corners: [
+      [0, 0, 0],
+      [0, 0, 1],
+      [0, 1, 1],
+      [0, 1, 0],
+    ],
+  },
+  {
+    normal: [0, 0, 1],
+    tile: side,
+    corners: [
+      [0, 0, 1],
+      [1, 0, 1],
+      [1, 1, 1],
+      [0, 1, 1],
+    ],
+  },
+  {
+    normal: [0, 0, -1],
+    tile: side,
+    corners: [
+      [1, 0, 0],
+      [0, 0, 0],
+      [0, 1, 0],
+      [1, 1, 0],
+    ],
+  },
+  {
+    normal: [0, 1, 0],
+    tile: (b) => b.top,
+    corners: [
+      [0, 1, 1],
+      [1, 1, 1],
+      [1, 1, 0],
+      [0, 1, 0],
+    ],
+  },
+  {
+    normal: [0, -1, 0],
+    tile: (b) => b.bottom,
+    corners: [
+      [0, 0, 0],
+      [1, 0, 0],
+      [1, 0, 1],
+      [0, 0, 1],
+    ],
+  },
 ]
 
 // a face is hidden by an opaque neighbour, or by a neighbour of the same see-through type
@@ -84,7 +138,14 @@ export function voxelsToObj(grid: VoxelGrid, name: string): ObjExport {
     `usemtl ${BLOCKS[id].name}`,
     ...faces,
   ])
-  const obj = [`# Sample export in Mineways layout`, `mtllib ${name}.mtl`, ...v, ...vt, ...vn, ...groups]
+  const obj = [
+    `# Sample export in Mineways layout`,
+    `mtllib ${name}.mtl`,
+    ...v,
+    ...vt,
+    ...vn,
+    ...groups,
+  ]
 
   const mtl = [...facesByBlock.keys()].flatMap((id) => {
     const block = BLOCKS[id]

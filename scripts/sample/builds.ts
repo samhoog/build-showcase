@@ -43,7 +43,13 @@ function cottage(): VoxelGrid {
   g.fill(3, 2, 4, 11, 4, 10, 'planks')
   g.fill(4, 1, 5, 10, 4, 9, null)
   g.fill(4, 0, 5, 10, 0, 9, 'planks')
-  for (const [x, z] of [[3, 4], [11, 4], [3, 10], [11, 10]]) g.fill(x, 1, z, x, 4, z, 'log')
+  for (const [x, z] of [
+    [3, 4],
+    [11, 4],
+    [3, 10],
+    [11, 10],
+  ])
+    g.fill(x, 1, z, x, 4, z, 'log')
 
   // door, windows, and a sand path out to the edge
   g.fill(7, 1, 10, 7, 2, 10, null)
@@ -102,7 +108,13 @@ function watchtower(): VoxelGrid {
   for (const [x, y, z, id] of [...g])
     if (id === 'stone' && hash(x, y, z) < 0.3) g.set(x, y, z, 'cobble')
   for (const y of [6, 12, 18])
-    for (const [dx, dz] of [[4, 0], [-4, 0], [0, 4], [0, -4]]) g.fill(c + dx, y, c + dz, c + dx, y + 1, c + dz, 'glass')
+    for (const [dx, dz] of [
+      [4, 0],
+      [-4, 0],
+      [0, 4],
+      [0, -4],
+    ])
+      g.fill(c + dx, y, c + dz, c + dx, y + 1, c + dz, 'glass')
   g.fill(c, 1, c + 4, c, 2, c + 4, null)
 
   // overhanging platform with crenellations and a beacon

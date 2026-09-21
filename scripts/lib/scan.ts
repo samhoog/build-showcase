@@ -33,7 +33,10 @@ async function readJson<T>(path: string): Promise<Partial<T>> {
 
 async function subdirs(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true })
-  return entries.filter((e) => e.isDirectory()).map((e) => e.name).sort()
+  return entries
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name)
+    .sort()
 }
 
 async function scanBuild(dir: string, folder: string): Promise<BuildSource | string> {

@@ -53,7 +53,9 @@ describe('objToGlb + optimizeGlb', () => {
       'EXT_meshopt_compression',
     )
 
-    const modes = Object.fromEntries(root.listMaterials().map((m) => [m.getName(), m.getAlphaMode()]))
+    const modes = Object.fromEntries(
+      root.listMaterials().map((m) => [m.getName(), m.getAlphaMode()]),
+    )
     expect(modes).toMatchObject({ Stone: 'OPAQUE', Oak_Leaves: 'MASK', Water: 'BLEND' })
   })
 })

@@ -30,7 +30,9 @@ async function convertBuild(username: string, source: BuildSource): Promise<Buil
 
   await mkdir(join(PUBLIC, 'builds', username), { recursive: true })
   await writeFile(join(PUBLIC, file), glb)
-  console.log(`  ${source.slug}: ${mb(raw.byteLength)} -> ${mb(glb.byteLength)}, ${stats.triangles} triangles`)
+  console.log(
+    `  ${source.slug}: ${mb(raw.byteLength)} -> ${mb(glb.byteLength)}, ${stats.triangles} triangles`,
+  )
 
   return {
     slug: source.slug,

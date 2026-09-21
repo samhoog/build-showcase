@@ -9,7 +9,11 @@ export async function readManifest(path: string): Promise<Manifest | null> {
   }
 }
 
-export function findBuild(manifest: Manifest | null, username: string, slug: string): Build | undefined {
+export function findBuild(
+  manifest: Manifest | null,
+  username: string,
+  slug: string,
+): Build | undefined {
   return manifest?.players.find((p) => p.username === username)?.builds.find((b) => b.slug === slug)
 }
 
