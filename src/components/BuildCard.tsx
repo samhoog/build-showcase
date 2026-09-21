@@ -61,7 +61,7 @@ export function BuildCard({ player, build, coBuilders, featured = false }: Props
     acquireBuild(url).then(
       (model) => {
         if (cancelled) return
-        view.show(model)
+        view.show(model, build.view)
         setStatus('ready')
       },
       () => {
@@ -74,7 +74,7 @@ export function BuildCard({ player, build, coBuilders, featured = false }: Props
       view.clear()
       releaseBuild(url)
     }
-  }, [near, url, attempt])
+  }, [near, url, attempt, build.view])
 
   // a press that turned into a drag was an orbit, not a request to open the build
   const openIfClick = (event: React.MouseEvent) => {

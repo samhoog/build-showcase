@@ -1,7 +1,8 @@
 import { type Object3D, Vector3 } from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import type { StartView } from '../../shared/manifest.ts'
 import type { Viewport } from '../stage/Stage.ts'
-import { type Bounds, fitDistance, frameBounds, viewDirection } from './framing.ts'
+import { type Bounds, fitDistance, frameBounds, viewAngles, viewDirection } from './framing.ts'
 import { addDaylight } from './lighting.ts'
 import type { PreparedModel } from './prepareModel.ts'
 
@@ -18,6 +19,7 @@ export class BuildView {
   private viewport: Viewport
   private model: Object3D | null = null
   private bounds: Bounds = { center: new Vector3(), radius: 1, halfHeight: 1 }
+  private start: StartView | undefined
   private dragging = false
   private allowTouch: boolean
 
@@ -62,11 +64,12 @@ export class BuildView {
     viewport.onFrame = (dt) => this.update(dt)
   }
 
-  show(model: PreparedModel) {
+  show(model: PreparedModel, start?: StartView) {
     this.clear()
     // a clone shares geometry and materials, so card and viewer can show one build at once
     this.model = model.object.clone()
     this.bounds = model.bounds
+    this.start = start
     this.viewport.scene.add(this.model)
     this.resetView()
   }
@@ -77,12 +80,40 @@ export class BuildView {
     this.model = null
   }
 
+  // Back to the starting view: the build's own if build.json has one, else the default
   resetView() {
-    this.controls.target.copy(this.bounds.center)
-    frameBounds(this.viewport.camera, this.bounds)
+    const { camera } = this.viewport
+    const start = this.start
+    const target = start?.target ? new Vector3(...start.target) : this.bounds.center
+    const direction = viewDirection(start?.azimuth, start?.elevation)
+    this.controls.target.copy(target)
+    frameBounds(camera, { ...this.bounds, center: target }, direction)
+    if (start?.zoom) {
+      const fit = fitDistance(this.bounds, camera.fov, camera.aspect, direction)
+      camera.position.copy(target).addScaledVector(direction, fit / start.zoom)
+    }
     this.applyZoomLimits()
     this.controls.update()
     this.viewport.invalidate()
+  }
+
+  // The current camera as a StartView, for pasting into build.json. Target is left out
+  // when it is still the centre of the build.
+  describeView(): StartView {
+    const { camera } = this.viewport
+    const target = this.controls.target
+    const offset = camera.position.clone().sub(target)
+    const { azimuth, elevation } = viewAngles(offset)
+    const fit = fitDistance(this.bounds, camera.fov, camera.aspect, offset.clone().normalize())
+    const view: StartView = {
+      azimuth: Math.round(azimuth),
+      elevation: Math.round(elevation),
+      zoom: Number((fit / offset.length()).toFixed(2)),
+    }
+    if (target.distanceTo(this.bounds.center) > 0.5) {
+      view.target = target.toArray().map((v) => Number(v.toFixed(1))) as StartView['target']
+    }
+    return view
   }
 
   // Orbit by keyboard: angles in radians, zoom as a distance multiplier
