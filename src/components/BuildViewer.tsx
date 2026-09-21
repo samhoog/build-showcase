@@ -20,7 +20,6 @@ export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
   const closeRef = useRef<HTMLButtonElement>(null)
   const [status, setStatus] = useState<Status>('loading')
   const [attempt, setAttempt] = useState(0)
-  const [rotating, setRotating] = useState(true)
   const [touched, setTouched] = useState(false)
   const url = assetUrl(build.file, build.hash)
 
@@ -42,7 +41,6 @@ export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
     (viewport) => {
       const view = new BuildView(viewport, { fullControls: true, allowTouch: true })
       viewRef.current = view
-      setRotating(view.isRotating)
       view.controls.addEventListener('start', () => setTouched(true))
       Stage.get().setExclusive(viewport)
       return () => {
@@ -76,12 +74,6 @@ export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
     }
   }, [url, attempt])
 
-  const toggleRotation = () => {
-    const next = !rotating
-    viewRef.current?.setRotating(next)
-    setRotating(next)
-  }
-
   const onKeyDown = (event: React.KeyboardEvent) => {
     const view = viewRef.current
     // leave keys alone while a button has focus, so Space and Enter still press it
@@ -95,7 +87,6 @@ export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
       '=': () => view.nudge(0, 0, 0.9),
       '-': () => view.nudge(0, 0, 1.1),
       r: () => view.resetView(),
-      ' ': toggleRotation,
     }
     const move = moves[event.key]
     if (move) {
@@ -131,14 +122,6 @@ export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
           onClick={() => viewRef.current?.resetView()}
         >
           Reset view
-        </button>
-        <button
-          type="button"
-          className={styles.button}
-          onClick={toggleRotation}
-          aria-pressed={rotating}
-        >
-          {rotating ? 'Pause turning' : 'Keep turning'}
         </button>
       </div>
 
