@@ -1,7 +1,7 @@
 // npm run convert: models-src/<username>/<build>/ -> public/builds/<username>/<build>.glb,
 // plus player skins and the manifest the site reads. Everything it writes is gitignored.
 import { createHash } from 'node:crypto'
-import { mkdir, readdir, rm, stat, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { Build, Player } from '../shared/manifest.ts'
 import { findBuild, readManifest, sortManifest } from './lib/manifest.ts'
@@ -11,6 +11,8 @@ import { type BuildSource, scanSources } from './lib/scan.ts'
 import { ensureSkin } from './lib/skins.ts'
 
 const SOURCES = 'models-src'
+// committed list of usernames, so players exist before (and apart from) their model files
+const ROSTER = 'players.json'
 const PUBLIC = 'public'
 const MANIFEST = join(PUBLIC, 'builds', 'manifest.json')
 
@@ -58,10 +60,11 @@ async function removeStale(players: Player[]) {
 }
 
 const previous = await readManifest(MANIFEST)
-const { players: sources, problems } = await scanSources(SOURCES).catch(() => ({
-  players: [],
-  problems: [`${SOURCES}/ not found`],
-}))
+const roster = await readFile(ROSTER, 'utf8').then(
+  (text) => JSON.parse(text) as string[],
+  () => [],
+)
+const { players: sources, problems } = await scanSources(SOURCES, roster)
 const players: Player[] = []
 let failed = 0
 
