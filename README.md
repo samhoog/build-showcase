@@ -4,7 +4,7 @@ A web app for showing off Minecraft builds as interactive 3D models, grouped by 
 who built them.
 
 - **Home** is a lineup of every player as a live 3D figure in their own skin. Click one.
-- **A player's page** shows each of their builds as a slowly turning 3D card.
+- **A player's page** shows each of their builds as a live 3D card you can turn.
 - **Any build opens full screen** to spin, zoom and pan, and has its own shareable link.
 
 It is a static site: no backend, no accounts. Models come from

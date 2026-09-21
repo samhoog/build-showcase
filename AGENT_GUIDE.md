@@ -76,21 +76,21 @@ runtime; skins are downloaded from Mojang at convert time.
 
 ### Site (`src/`)
 
-| File                                       | Purpose                                                                          |
-| ------------------------------------------ | -------------------------------------------------------------------------------- |
-| `stage/Stage.ts`                           | `Stage` singleton and `Viewport`                                                 |
-| `stage/useViewport.ts`                     | React hook that registers a canvas with the Stage                                |
-| `three/buildView.ts`                       | `BuildView`: lights, OrbitControls, auto-rotate, keyboard nudge, reset           |
-| `three/framing.ts`                         | `Bounds` (upright cylinder), `fitDistance`, `frameBounds`                        |
-| `three/prepareModel.ts`                    | GLTF scene -> Lambert materials with nearest-neighbour textures, bounds, dispose |
-| `three/buildCache.ts`, `three/lruCache.ts` | lazy GLB loading, ref-counted LRU                                                |
-| `three/playerFigure.ts`                    | skinview3d `PlayerObject` with idle, look-at and wave animation                  |
-| `pointer.ts`                               | shared mouse position and the reduced-motion query                               |
-| `data/manifest.ts`                         | `useManifest`, `assetUrl`, `findPlayer`, `findBuild`, `formatSize`               |
-| `components/PlayerLineup.tsx`              | home page lineup; each figure is a real link                                     |
-| `components/BuildCard.tsx`                 | live card; loads when near the viewport, releases when far                       |
-| `components/BuildViewer.tsx`               | fullscreen modal `<dialog>`, driven by the route                                 |
-| `pages/ManifestGate.tsx`                   | loading / empty / error states for every page                                    |
+| File                                       | Purpose                                                                                                         |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `stage/Stage.ts`                           | `Stage` singleton and `Viewport`                                                                                |
+| `stage/useViewport.ts`                     | React hook that registers a canvas with the Stage                                                               |
+| `three/buildView.ts`                       | `BuildView`: lights, OrbitControls, keyboard nudge, reset. No auto-rotate: nothing moves until someone moves it |
+| `three/framing.ts`                         | `Bounds` (upright cylinder), `fitDistance`, `frameBounds`                                                       |
+| `three/prepareModel.ts`                    | GLTF scene -> Lambert materials with nearest-neighbour textures, bounds, dispose                                |
+| `three/buildCache.ts`, `three/lruCache.ts` | lazy GLB loading, ref-counted LRU                                                                               |
+| `three/playerFigure.ts`                    | skinview3d `PlayerObject` with idle, look-at and wave animation                                                 |
+| `pointer.ts`                               | shared mouse position and the reduced-motion query                                                              |
+| `data/manifest.ts`                         | `useManifest`, `assetUrl`, `findPlayer`, `findBuild`, `formatSize`                                              |
+| `components/PlayerLineup.tsx`              | home page lineup; each figure is a real link                                                                    |
+| `components/BuildCard.tsx`                 | live card; loads when near the viewport, releases when far                                                      |
+| `components/BuildViewer.tsx`               | fullscreen modal `<dialog>`, driven by the route                                                                |
+| `pages/ManifestGate.tsx`                   | loading / empty / error states for every page                                                                   |
 
 ## Data Model
 
@@ -122,7 +122,9 @@ summing players' lists, and treat every builder the same: there is no visible "o
   around them carries the meaning.
 - **Touch:** inline views must not steal scrolling (`touch-action: pan-y`, controls ignore
   touch). Only the fullscreen viewer takes over touch.
-- **Motion:** only the 3D moves, and `reducedMotion.matches` must stop anything automatic.
+- **Motion:** builds never move on their own (a slow automatic turn reads as lag on big
+  builds); the "Open" badge on a card is what signals interactivity. Player figures idle,
+  and `reducedMotion.matches` must stop that.
 - **States:** every fetch has loading, empty and error UI with a specific message and a
   "Try again" where retrying can help.
 
