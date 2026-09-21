@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto'
 import { mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { Build, Player } from '../shared/manifest.ts'
-import { findBuild, readManifest, sortManifest } from './lib/manifest.ts'
+import { findBuild, readManifest, shareBuilds, sortManifest } from './lib/manifest.ts'
 import { objToGlb } from './lib/obj-to-glb.ts'
 import { PUBLIC_DIR, ROSTER_FILE, SOURCES_DIR } from './lib/paths.ts'
 import { optimizeGlb } from './lib/optimize.ts'
@@ -40,11 +40,17 @@ async function convertBuild(username: string, source: BuildSource): Promise<Buil
   return {
     slug: source.slug,
     ...source.meta,
+    builders: withOwner(username, source),
     file,
     hash: createHash('sha1').update(glb).digest('hex').slice(0, 8),
     bytes: glb.byteLength,
     ...stats,
   }
+}
+
+// the player whose folder holds the files, then whoever build.json credits
+function withOwner(username: string, source: BuildSource): string[] {
+  return [username, ...(source.meta.builders ?? [])]
 }
 
 // delete GLBs whose source folder is gone
@@ -75,9 +81,11 @@ for (const source of sources) {
 
   for (const build of source.builds) {
     // unchanged since the last run: keep the previous entry, but pick up build.json edits
+    // (a build shared with this player by someone else is theirs, not a previous run of this)
+    const own = `builds/${source.username}/${build.slug}.glb`
     const known = findBuild(previous, source.username, build.slug)
-    if (known && (await mtimeMs(join(PUBLIC, known.file))) > build.newestMtimeMs) {
-      builds.push({ ...known, ...build.meta })
+    if (known?.file === own && (await mtimeMs(join(PUBLIC, own))) > build.newestMtimeMs) {
+      builds.push({ ...known, ...build.meta, builders: withOwner(source.username, build) })
       console.log(`  ${build.slug}: up to date`)
       continue
     }
@@ -100,11 +108,15 @@ for (const source of sources) {
 }
 
 await mkdir(join(PUBLIC, 'builds'), { recursive: true })
-const manifest = { generatedAt: new Date().toISOString(), players: sortManifest(players) }
+// shared builds go under every builder before sorting, so they count towards each total
+const shared = shareBuilds(players)
+problems.push(...shared.problems)
+const manifest = { generatedAt: new Date().toISOString(), players: sortManifest(shared.players) }
 await writeFile(MANIFEST, JSON.stringify(manifest, null, 2))
 await removeStale(players)
 
 for (const problem of problems) console.warn(`warning: ${problem}`)
+// count files, not listings: a shared build is one build
 const total = players.reduce((n, p) => n + p.builds.length, 0)
 console.log(`${players.length} players, ${total} builds -> ${MANIFEST}`)
 if (failed > 0) {
