@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, rm, utimes, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -94,5 +94,20 @@ describe('scanSources', () => {
     const { players, problems } = await scanSources(root, ['no spaces allowed'])
     expect(players).toEqual([])
     expect(problems.join()).toMatch(/not a valid Minecraft username/)
+  })
+
+  it('dates a build by its model files, so editing build.json does not reconvert it', async () => {
+    await addBuild('jeb_', 'tower', { 't.obj': '', 't.png': '', 'build.json': '{}' })
+    const dir = join(root, 'jeb_', 'tower')
+    const model = new Date('2026-01-01T00:00:00Z')
+    await utimes(join(dir, 't.obj'), model, model)
+    await utimes(join(dir, 't.png'), model, model)
+    // build.json edited much later
+    const edited = new Date('2026-09-01T00:00:00Z')
+    await utimes(join(dir, 'build.json'), edited, edited)
+
+    const { players } = await scanSources(root)
+
+    expect(players[0].builds[0].newestMtimeMs).toBe(model.getTime())
   })
 })

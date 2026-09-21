@@ -17,7 +17,8 @@ export type BuildSource = {
   dir: string
   objPath: string
   meta: BuildMeta
-  // newest mtime of any file in the folder, used to skip unchanged builds
+  // newest mtime of the model's own files, used to skip unchanged builds. build.json is
+  // left out: convert applies its edits to the manifest without redoing the model.
   newestMtimeMs: number
 }
 
@@ -55,7 +56,8 @@ async function scanBuild(dir: string, folder: string): Promise<BuildSource | str
   if (objs.length === 0) return `${dir}: no .obj file, skipped`
   if (objs.length > 1) return `${dir}: more than one .obj file, keep one build per folder`
 
-  const mtimes = await Promise.all(files.map((f) => stat(join(f.parentPath, f.name))))
+  const modelFiles = files.filter((f) => f.name !== 'build.json')
+  const mtimes = await Promise.all(modelFiles.map((f) => stat(join(f.parentPath, f.name))))
   const meta = await readJson<BuildMeta>(join(dir, 'build.json'))
   return {
     slug: toSlug(folder),
