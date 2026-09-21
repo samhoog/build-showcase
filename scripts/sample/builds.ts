@@ -7,6 +7,8 @@ export type SampleBuild = {
   title: string
   description: string
   builtOn: string
+  // other builders to credit, to exercise shared builds
+  builders?: string[]
   build: () => VoxelGrid
 }
 
@@ -214,6 +216,7 @@ export const SAMPLE_BUILDS: SampleBuild[] = [
     title: 'Stone bridge',
     description: 'Arched river crossing with lantern posts.',
     builtOn: '2026-09-01',
+    builders: ['Notch'],
     build: stoneBridge,
   },
 ]
