@@ -55,13 +55,17 @@ export class Stage {
   private bufferWidth = 0
   private bufferHeight = 0
 
-  private intersections = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      const viewport = this.find(entry.target)
-      if (viewport) viewport.visible = entry.isIntersecting
-    }
-    this.wake()
-  })
+  private intersections = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        const viewport = this.find(entry.target)
+        if (viewport) viewport.visible = entry.isIntersecting
+      }
+      this.wake()
+      // count as visible slightly early, so a view is already drawn when it scrolls in
+    },
+    { rootMargin: '25% 0px' },
+  )
 
   private resizes = new ResizeObserver((entries) => {
     for (const entry of entries) {
@@ -181,8 +185,14 @@ export class Stage {
     context.clearRect(0, 0, width, height)
     context.drawImage(
       renderer.domElement,
-      0, this.bufferHeight - height, width, height,
-      0, 0, width, height,
+      0,
+      this.bufferHeight - height,
+      width,
+      height,
+      0,
+      0,
+      width,
+      height,
     )
     viewport.dirty = false
   }
