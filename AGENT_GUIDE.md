@@ -96,6 +96,9 @@ runtime; skins are downloaded from Mojang at convert time.
 
 `shared/manifest.ts` is the single definition. `file` and `skin` are site-root-relative and
 must go through `assetUrl()` (it applies `BASE_PATH` and the cache-busting `hash`).
+A shared build is one file listed under each of its `builders` (`shareBuilds` in
+`scripts/lib/manifest.ts`), so count builds with `countBuilds()` (unique files), never by
+summing players' lists, and treat every builder the same: there is no visible "owner".
 `size` is whole blocks `[x, y, z]`, valid because Mineways exports one unit per block.
 
 ## Testing Patterns

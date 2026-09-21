@@ -13,10 +13,20 @@ models-src/
       anything.obj             exactly one .obj per folder
       anything.mtl
       *.png                    whatever textures the .mtl points at
-      build.json               optional: { "title": "...", "description": "...", "builtOn": "2026-08-01" }
+      build.json               optional: { "title": "...", "description": "...", "builtOn": "2026-08-01",
+                                           "builders": ["mason31", "jw01"] }
 ```
 
 Then run `npm run convert`. Only builds whose files changed are converted again.
+
+## Builds with more than one builder
+
+Keep the files once, under any one of the builders, and list the others in `build.json` as
+`"builders"`. Never copy the files. The build shows on every builder's page crediting the
+others, counts towards each of their totals, and is still one model that downloads once.
+Which folder holds it is housekeeping only and does not show on the site. Builders must be
+in `players.json`; convert warns about a name that isn't, or about a builder who already has
+their own build with the same folder name.
 
 ## Exporting from Mineways
 

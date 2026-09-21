@@ -26,7 +26,8 @@ npm run dev
 
 1. Export it from Mineways as OBJ into `models-src/<minecraft-username>/<build-name>/`
    (settings in [models-src/README.md](models-src/README.md)).
-2. Optionally add a `build.json` with `title`, `description` and `builtOn`.
+2. Optionally add a `build.json` with `title`, `description`, `builtOn`, and `builders` (the
+   other players who worked on it; the build then appears on all of their pages).
 3. `npm run convert`.
 
 ## Adding a player
