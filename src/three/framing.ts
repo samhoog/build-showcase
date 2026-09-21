@@ -1,8 +1,7 @@
 import { MathUtils, type PerspectiveCamera, Vector3 } from 'three'
 
 // three-quarter view from above, the angle a build is usually screenshotted from
-const AZIMUTH = MathUtils.degToRad(35)
-const ELEVATION = MathUtils.degToRad(24)
+export const DEFAULT_VIEW = { azimuth: 35, elevation: 24 }
 // breathing room around the build, as a fraction of the fitted distance
 const MARGIN = 1.06
 const UP = new Vector3(0, 1, 0)
@@ -16,12 +15,24 @@ export type Bounds = {
   halfHeight: number
 }
 
-export function viewDirection(): Vector3 {
-  return new Vector3(
-    Math.sin(AZIMUTH) * Math.cos(ELEVATION),
-    Math.sin(ELEVATION),
-    Math.cos(AZIMUTH) * Math.cos(ELEVATION),
-  )
+// Unit vector from the target towards the camera. Azimuth is measured around the vertical
+// axis from +Z, elevation up from the horizon, both in degrees.
+export function viewDirection(
+  azimuth = DEFAULT_VIEW.azimuth,
+  elevation = DEFAULT_VIEW.elevation,
+): Vector3 {
+  const a = MathUtils.degToRad(azimuth)
+  const e = MathUtils.degToRad(elevation)
+  return new Vector3(Math.sin(a) * Math.cos(e), Math.sin(e), Math.cos(a) * Math.cos(e))
+}
+
+// The inverse: angles in degrees for an offset from target to camera
+export function viewAngles(offset: Vector3): { azimuth: number; elevation: number } {
+  const length = offset.length() || 1
+  return {
+    azimuth: MathUtils.radToDeg(Math.atan2(offset.x, offset.z)),
+    elevation: MathUtils.radToDeg(Math.asin(MathUtils.clamp(offset.y / length, -1, 1))),
+  }
 }
 
 // Closest the camera can be along `direction` with the whole cylinder inside the frustum

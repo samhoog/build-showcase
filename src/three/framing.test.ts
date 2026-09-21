@@ -1,6 +1,6 @@
 import { PerspectiveCamera, Vector3 } from 'three'
 import { describe, expect, it } from 'vitest'
-import { type Bounds, fitDistance, frameBounds } from './framing.ts'
+import { type Bounds, fitDistance, frameBounds, viewAngles, viewDirection } from './framing.ts'
 
 const tower: Bounds = { center: new Vector3(5, 10, -3), radius: 6, halfHeight: 20 }
 const slab: Bounds = { center: new Vector3(), radius: 20, halfHeight: 2 }
@@ -52,5 +52,26 @@ describe('frameBounds', () => {
     const camera = new PerspectiveCamera(35, 4 / 3)
     frameBounds(camera, tower)
     expect(camera.position.y).toBeGreaterThan(tower.center.y)
+  })
+})
+
+describe('viewDirection and viewAngles', () => {
+  it.each([
+    [35, 24],
+    [-120, 5],
+    [180, 80],
+  ])('round-trip azimuth %d, elevation %d', (azimuth, elevation) => {
+    const angles = viewAngles(viewDirection(azimuth, elevation).multiplyScalar(40))
+    expect(angles.azimuth).toBeCloseTo(azimuth)
+    expect(angles.elevation).toBeCloseTo(elevation)
+  })
+
+  it('looks from +Z at zero azimuth, and from above at 90 elevation', () => {
+    expect(
+      viewDirection(0, 0)
+        .toArray()
+        .map((v) => +v.toFixed(6)),
+    ).toEqual([0, 0, 1])
+    expect(viewDirection(0, 90).y).toBeCloseTo(1)
   })
 })
