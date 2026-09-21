@@ -1,13 +1,19 @@
 .nametag {
+  /* horizontal padding, and the pixel face's average glyph width in ems */
+  --pad: 0.9rem;
+  --glyph: 0.62;
+
   display: inline-block;
-  max-width: 100%;
-  padding: 0.1em 0.45em 0.15em;
-  overflow: hidden;
+  padding: 0.1em calc(var(--pad) / 2) 0.15em;
   background: rgb(21 18 30 / 0.78);
   color: #fff;
   font-family: var(--font-nametag);
-  font-size: var(--text-md);
+  /* full size when it fits, otherwise whatever size makes all the characters fit the
+     container (the lineup spot); outside a container 100cqw is the viewport width */
+  font-size: min(
+    var(--nametag-size, var(--text-md)),
+    calc((100cqw - var(--pad)) / (var(--chars) * var(--glyph)))
+  );
   line-height: 1.25;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }

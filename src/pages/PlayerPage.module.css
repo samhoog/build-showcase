@@ -23,15 +23,12 @@
 
 .name {
   margin-bottom: var(--space-1);
+  --nametag-size: var(--text-xl);
   /* a nametag, not a headline: drop the wide heading cut */
   font-stretch: 100%;
   font-weight: 400;
   font-size: var(--text-xl);
   letter-spacing: 0;
-}
-
-.name span {
-  font-size: inherit;
 }
 
 .intro > div {

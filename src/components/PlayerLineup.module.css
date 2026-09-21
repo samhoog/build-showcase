@@ -25,6 +25,8 @@
 
 .spot {
   width: var(--spot);
+  /* lets the nametag size itself to the spot */
+  container-type: inline-size;
 }
 
 .link {
