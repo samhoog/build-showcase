@@ -1,3 +1,4 @@
+import type { StartView } from '../../shared/manifest.ts'
 import type { BlockId } from './blocks.ts'
 import { VoxelGrid } from './voxel-obj.ts'
 
@@ -9,6 +10,8 @@ export type SampleBuild = {
   builtOn: string
   // other builders to credit, to exercise shared builds
   builders?: string[]
+  // custom starting camera, to exercise build.json views
+  view?: StartView
   build: () => VoxelGrid
 }
 
@@ -200,6 +203,7 @@ export const SAMPLE_BUILDS: SampleBuild[] = [
     title: 'Watchtower',
     description: 'Twenty-eight blocks of stone with a beacon on top.',
     builtOn: '2026-05-20',
+    view: { azimuth: -60, elevation: 10, zoom: 1.3 },
     build: watchtower,
   },
   {

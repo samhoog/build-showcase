@@ -213,6 +213,32 @@ test('keyboard turns and resets the build in the viewer', async ({ page }) => {
   expect(await pixelsOf(canvas)).toBe(start)
 })
 
+test('the camera readout shows the view, and a build.json view is where the camera starts', async ({
+  page,
+}) => {
+  // island-oak has no view of its own, so it starts at the default
+  await page.goto('/p/jeb_/island-oak?camera')
+  const readout = page.locator('pre', { hasText: '"view":' })
+  await expect(readout).toHaveText('"view": {"azimuth":35,"elevation":24,"zoom":1}')
+
+  // turning the build updates the readout live
+  await page.getByRole('dialog').locator('canvas').focus()
+  await page.keyboard.press('ArrowLeft')
+  await expect(readout).not.toHaveText(/"azimuth":35,/)
+
+  // the watchtower's build.json says where to start, and the readout reads it back
+  await page.goto('/p/jeb_/watchtower?camera')
+  await expect(page.locator('pre', { hasText: '"view":' })).toHaveText(
+    '"view": {"azimuth":-60,"elevation":10,"zoom":1.3}',
+  )
+
+  // C toggles it, and it is off by default
+  await page.keyboard.press('c')
+  await expect(page.locator('pre')).toHaveCount(0)
+  await page.goto('/p/jeb_/watchtower')
+  await expect(page.locator('pre')).toHaveCount(0)
+})
+
 test('touch scrolling is left to the page on cards, and taken over in the viewer', async ({
   page,
 }) => {
