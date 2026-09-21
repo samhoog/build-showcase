@@ -1,0 +1,49 @@
+.lineup {
+  --spot: clamp(6.5rem, 29vw, 9.5rem);
+  --tag: 1.75rem;
+  --ground: 0.5rem;
+  --caption: 2rem;
+  --row-gap: var(--space-4);
+  /* one row: nametag, figure (3:5), ground strip, caption */
+  --figure: calc(var(--spot) * 5 / 3);
+  --row: calc(var(--tag) + var(--figure) + var(--ground) + var(--caption) + var(--row-gap));
+  --ground-top: calc(var(--tag) + var(--figure));
+
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: var(--row-gap);
+  /* the ground runs the full width of every row: a grass block seen side-on */
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 var(--ground-top),
+    var(--grass) var(--ground-top) calc(var(--ground-top) + var(--ground) * 0.375),
+    var(--dirt) calc(var(--ground-top) + var(--ground) * 0.375)
+      calc(var(--ground-top) + var(--ground)),
+    transparent calc(var(--ground-top) + var(--ground)) var(--row)
+  );
+}
+
+.spot {
+  width: var(--spot);
+}
+
+.link {
+  display: grid;
+  grid-template-rows: var(--tag) var(--figure) var(--ground) var(--caption);
+  justify-items: center;
+  align-items: end;
+  text-decoration: none;
+}
+
+.count {
+  grid-row: 4;
+  align-self: center;
+  color: var(--slate);
+  font-size: var(--text-sm);
+}
+
+.link:hover .count,
+.link:focus-visible .count {
+  color: var(--lapis);
+  text-decoration: underline;
+}
