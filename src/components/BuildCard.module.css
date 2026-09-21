@@ -1,0 +1,76 @@
+.card {
+  min-width: 0;
+}
+
+.view {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  /* the sky is plain CSS behind a transparent canvas */
+  background: linear-gradient(var(--sky), var(--horizon));
+}
+
+.canvas {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.canvas:active {
+  cursor: grabbing;
+}
+
+.note {
+  position: absolute;
+  left: var(--space-3);
+  bottom: var(--space-2);
+  right: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.retry {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--lapis);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.title {
+  margin-top: var(--space-2);
+  font-size: var(--text-lg);
+}
+
+.title a {
+  text-decoration: none;
+}
+
+.title a:hover {
+  color: var(--lapis);
+  text-decoration: underline;
+}
+
+.size {
+  color: var(--slate);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.description {
+  max-width: 60ch;
+  margin-top: var(--space-1);
+}
+
+@media (min-width: 44rem) {
+  .featured {
+    grid-column: 1 / -1;
+  }
+
+  .featured .view {
+    aspect-ratio: 16 / 9;
+  }
+
+  .featured .title {
+    font-size: var(--text-xl);
+  }
+}
