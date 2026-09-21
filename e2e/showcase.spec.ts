@@ -118,24 +118,18 @@ test("a shared build shows on every builder's page, credits the others, and is o
   expect(downloads).toHaveLength(1)
 })
 
-test('cards turn on their own', async ({ page }) => {
+test('cards hold still until someone moves them, and say they can be opened', async ({ page }) => {
   await page.goto('/p/Notch')
-  const canvas = page.getByRole('article').first().locator('canvas')
-  await expectDrawn(canvas)
-  const before = await pixelsOf(canvas)
-  await page.waitForTimeout(3500)
-  expect(await pixelsOf(canvas)).not.toBe(before)
-})
-
-test('cards stay still for people who prefer reduced motion', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.goto('/p/Notch')
-  const canvas = page.getByRole('article').first().locator('canvas')
+  const card = page.getByRole('article').first()
+  const canvas = card.locator('canvas')
   await expectDrawn(canvas)
   await page.waitForTimeout(500)
   const before = await pixelsOf(canvas)
-  await page.waitForTimeout(3500)
+  await page.waitForTimeout(2500)
   expect(await pixelsOf(canvas)).toBe(before)
+
+  // the badge is the visible cue that the still picture is interactive
+  await expect(card.getByText('Open')).toBeVisible()
 })
 
 test('a card opens the fullscreen viewer, and Escape or Back closes it', async ({
@@ -183,7 +177,6 @@ test('dragging a card with the mouse orbits it instead of opening it', async ({
   isMobile,
 }) => {
   test.skip(isMobile, 'touch never orbits a card')
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/p/jeb_')
   const canvas = page.getByRole('article').first().locator('canvas')
   await expectDrawn(canvas)
@@ -204,7 +197,6 @@ test('dragging a card with the mouse orbits it instead of opening it', async ({
 })
 
 test('keyboard turns and resets the build in the viewer', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/p/jeb_/island-oak')
   const canvas = page.getByRole('dialog').locator('canvas')
   await expectDrawn(canvas)
