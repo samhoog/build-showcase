@@ -23,7 +23,11 @@ export function PlayerLineup({ players }: { players: Player[] }) {
           >
             <Nametag name={player.displayName} />
             <PlayerFigure player={player} waving={active === player.username} />
-            <span className={styles.count}>{countLabel(player.builds.length, 'build')}</span>
+            <span className={styles.count}>
+              {player.builds.length === 0
+                ? 'No builds yet'
+                : countLabel(player.builds.length, 'build')}
+            </span>
           </Link>
         </li>
       ))}
