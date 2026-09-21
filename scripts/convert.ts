@@ -6,14 +6,15 @@ import { join } from 'node:path'
 import type { Build, Player } from '../shared/manifest.ts'
 import { findBuild, readManifest, sortManifest } from './lib/manifest.ts'
 import { objToGlb } from './lib/obj-to-glb.ts'
+import { PUBLIC_DIR, ROSTER_FILE, SOURCES_DIR } from './lib/paths.ts'
 import { optimizeGlb } from './lib/optimize.ts'
 import { type BuildSource, scanSources } from './lib/scan.ts'
 import { ensureSkin } from './lib/skins.ts'
 
-const SOURCES = 'models-src'
-// committed list of usernames, so players exist before (and apart from) their model files
-const ROSTER = 'players.json'
-const PUBLIC = 'public'
+// ROSTER: committed list of usernames, so players exist before (and apart from) their models
+const SOURCES = SOURCES_DIR
+const ROSTER = ROSTER_FILE
+const PUBLIC = PUBLIC_DIR
 const MANIFEST = join(PUBLIC, 'builds', 'manifest.json')
 
 const mb = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(2)} MB`

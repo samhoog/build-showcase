@@ -2,11 +2,12 @@
 // something to convert and show. Real models are never committed.
 import { access, mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { SOURCES_DIR } from '../lib/paths.ts'
 import { drawAtlas } from './atlas.ts'
 import { SAMPLE_BUILDS } from './builds.ts'
 import { voxelsToObj } from './voxel-obj.ts'
 
-const ROOT = 'models-src'
+const ROOT = SOURCES_DIR
 // marks folders this script owns, so it never overwrites a real export
 const MARKER = '.sample'
 
