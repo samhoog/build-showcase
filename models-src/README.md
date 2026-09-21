@@ -63,11 +63,14 @@ merges flat runs of faces and can cut the triangle count several times over, at 
 one draw call per block type. It should convert, but it is untested here; try it if a big
 build turns out too heavy.
 
-## What is and isn't verified
+## What is verified
 
-The pipeline is tested against the generated sample exports (`npm run sample`), which copy
-Mineways' layout: Y up, one unit per block, a material per block type, and the RGB / RGBA /
-Alpha texture trio. It has not yet been run against a real Mineways export. If the first one
-looks wrong, the two places to look are `TRANSLUCENT` in `scripts/lib/optimize.ts` (which
-materials blend rather than cut out) and `toBlockMaterial` in `src/three/prepareModel.ts`
-(texture filtering).
+Real Mineways 13.01 exports with the settings above convert and render correctly, the
+largest so far being 2.4 million triangles (a 190 MB intermediate, a 28 MB GLB, a few
+seconds to convert, 5 draw calls). Cutout leaves, stained glass and the block-size readout
+all match. Not yet checked on a real phone: the site rests between expensive frames so a
+slow device stays scrollable, but how smooth the largest builds feel there is unknown.
+
+If something does look wrong, the two places to look are `TRANSLUCENT` in
+`scripts/lib/optimize.ts` (which materials blend rather than cut out) and `toBlockMaterial`
+in `src/three/prepareModel.ts` (texture filtering).

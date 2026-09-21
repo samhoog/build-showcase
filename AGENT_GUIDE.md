@@ -139,14 +139,19 @@ summing players' lists, and treat every builder the same: there is no visible "o
 - `PlayerObject` stands with feet at y = -16 and head top at y = 16, in skin pixels.
 - `OrbitControls` sets `touch-action: none` on its element; `BuildView` puts `pan-y` back
   for cards, and gates touch with a `pointerdown` listener registered before the controls.
+- The Stage rests after expensive frames (`restUntil()`): real builds run to millions of
+  triangles, and drawing must never starve scrolling or taps. Animation still advances every
+  frame; only drawing is skipped. Don't add render loops that bypass it.
 - Frame deltas come from `frameDelta()` using consecutive rAF timestamps only. Mixing in
   `performance.now()` drops render time from the delta; on fast displays it went negative and
   every eased animation ran away (figures spinning wildly after a page change).
 - Usernames are identity: never truncate one. `Nametag` shrinks long names to fit instead.
 - Never resize or lossy-compress textures in the pipeline: it is pixel art.
 - Writing colours into a `Uint8Array` wraps above 255; clamp first (bit the sample atlas).
-- The pipeline is verified against generated samples only, not yet a real Mineways export.
-  See `models-src/README.md` for where to tune.
+- Sample players (Notch, jeb_) are an e2e fixture only. There is deliberately no npm script
+  for `scripts/sample/generate.ts`; never write samples into the real `models-src/`.
+- Verified against real Mineways 13 exports up to 2.4M triangles: hundreds of materials
+  collapse to 2-5 draw calls, conversion takes seconds. See `models-src/README.md`.
 - `gh` installed as a snap cannot read `/tmp`; pipe bodies in on stdin (`--body-file -`).
 - vitest only includes `src/` and `scripts/`; `e2e/*.spec.ts` belongs to Playwright.
 
