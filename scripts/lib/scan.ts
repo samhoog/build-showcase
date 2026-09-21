@@ -1,5 +1,6 @@
 import { readdir, readFile, stat } from 'node:fs/promises'
 import { join } from 'node:path'
+import type { StartView } from '../../shared/manifest.ts'
 import { isValidUsername, titleFromSlug, toSlug } from './slug.ts'
 
 export type BuildMeta = {
@@ -8,6 +9,7 @@ export type BuildMeta = {
   builtOn?: string
   // build.json lists the other builders; the folder's player is always one
   builders?: string[]
+  view?: StartView
 }
 
 export type BuildSource = {

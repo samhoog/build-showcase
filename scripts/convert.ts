@@ -100,7 +100,16 @@ for (const source of sources) {
     const own = `builds/${source.username}/${build.slug}.glb`
     const known = findBuild(previous, source.username, build.slug)
     if (known?.file === own && (await mtimeMs(join(PUBLIC, own))) > build.newestMtimeMs) {
-      builds.push({ ...known, ...build.meta, builders: withOwner(source.username, build) })
+      // spelled out so a field removed from build.json also leaves the manifest
+      const { description, builtOn, view } = build.meta
+      builds.push({
+        ...known,
+        ...build.meta,
+        description,
+        builtOn,
+        view,
+        builders: withOwner(source.username, build),
+      })
       console.log(`  ${build.slug}: up to date`)
       continue
     }
