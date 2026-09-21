@@ -20,18 +20,38 @@ Then run `npm run convert`. Only builds whose files changed are converted again.
 
 ## Exporting from Mineways
 
-Select the build, then **File > Export for Rendering** and choose **Wavefront OBJ**. The
-pipeline expects:
+Select the build, then **File > Export for Rendering**, file type **Wavefront OBJ**. Save
+straight into the build's folder; from Windows the repo is at
+`\\wsl.localhost\Ubuntu\home\<you>\...\build-showcase\models-src\<username>\<build-name>\`.
 
-| Setting      | Value                                                                                        | Why                                                                                  |
-| ------------ | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Textures     | full colour texture patterns, exported as the three large images (`-RGB`, `-RGBA`, `-Alpha`) | one shared texture lets the whole build collapse into very few draw calls            |
-| Up direction | Y up (leave "make Z the up direction" off)                                                   | matches three.js                                                                     |
-| Scale        | 1 block = 1 unit (the default 1000 mm per block, in metres)                                  | the site reads a build's size in blocks straight off the model                       |
-| Materials    | one per block type (the default)                                                             | material names such as `Water` or `Stained_Glass` decide what renders as translucent |
+Settings in the Export dialog, by its own labels:
 
-Option labels move around between Mineways versions; the values above are what matter.
-Separate per-tile textures also convert, they just produce more draw calls.
+| Setting                                                                                        | Value                | Why                                                                                           |
+| ---------------------------------------------------------------------------------------------- | -------------------- | --------------------------------------------------------------------------------------------- |
+| Export all textures to three large, mosaic images                                              | **selected**         | one shared texture lets the whole build collapse into very few draw calls                     |
+| Texture output: RGB / A / RGBA                                                                 | all checked          | the `.mtl` points at all three                                                                |
+| Create files themselves                                                                        | checked (no ZIP)     | the pipeline reads the loose files                                                            |
+| Export separate types                                                                          | checked              | one material per block type; names like `Water` or `Stained_Glass` decide what is translucent |
+| Export individual blocks                                                                       | **unchecked**        | one object per block makes enormous files                                                     |
+| Make Z the up direction instead of Y                                                           | **unchecked**        | three.js is Y up                                                                              |
+| Make each block `1000` mm high, model's units `Meters`                                         | as shown             | 1 block = 1 unit, which is how the site reads a build's size in blocks                        |
+| Create block faces at the borders                                                              | checked              | closes the cut sides and bottom of the selection, since builds are viewed from every angle    |
+| Double all billboard faces                                                                     | **checked**          | flowers, grass and crops are single quads and would vanish when seen from behind              |
+| Use biome in center of export area                                                             | checked              | grass, leaves and water get the colours of where the build actually is                        |
+| Export lesser, detailed blocks                                                                 | checked              | stairs, slabs, fences, doors                                                                  |
+| Center model around the origin                                                                 | checked              | harmless, keeps coordinates small                                                             |
+| Tree leaves solid                                                                              | unchecked            | cutout leaves look right; check it only if a tree-heavy build is too slow on phones           |
+| Fill air bubbles, Connect parts, Delete floating objects, Hollow out, Melt snow, Fatten, Debug | all unchecked        | 3D-printing features; they alter the build                                                    |
+| Everything else                                                                                | leave at its default |                                                                                               |
+
+For the selection box, set **Height Y min** a few blocks below the lowest part of the build
+so it sits on a slab of ground instead of being sliced at floor level. A high Y max costs
+nothing, air exports as nothing.
+
+**Large builds:** the alternative is _Export individual textures_ plus _Simplify mesh_, which
+merges flat runs of faces and can cut the triangle count several times over, at the cost of
+one draw call per block type. It should convert, but it is untested here; try it if a big
+build turns out too heavy.
 
 ## What is and isn't verified
 
