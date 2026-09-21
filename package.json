@@ -15,7 +15,8 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "check": "npm run lint && npm run typecheck && npm run test",
-    "sample": "node scripts/sample/generate.ts"
+    "sample": "node scripts/sample/generate.ts",
+    "convert": "node scripts/convert.ts"
   },
   "dependencies": {
     "react": "^19.3.0",
