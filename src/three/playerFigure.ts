@@ -92,6 +92,7 @@ export async function createPlayerFigure(
       time += dt
       const idle = reducedMotion ? 0 : 1
       const target = look ?? { x: Math.sin(time * 0.5) * 0.35 * idle, y: 0 }
+      // dt is never negative (see frameDelta), so this stays within 0..1 and always settles
       const ease = 1 - Math.exp(-dt * 9)
       const before = yaw + pitch + wave
 

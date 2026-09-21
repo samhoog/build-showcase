@@ -134,6 +134,9 @@ must go through `assetUrl()` (it applies `BASE_PATH` and the cache-busting `hash
 - `PlayerObject` stands with feet at y = -16 and head top at y = 16, in skin pixels.
 - `OrbitControls` sets `touch-action: none` on its element; `BuildView` puts `pan-y` back
   for cards, and gates touch with a `pointerdown` listener registered before the controls.
+- Frame deltas come from `frameDelta()` using consecutive rAF timestamps only. Mixing in
+  `performance.now()` drops render time from the delta; on fast displays it went negative and
+  every eased animation ran away (figures spinning wildly after a page change).
 - Never resize or lossy-compress textures in the pipeline: it is pixel art.
 - Writing colours into a `Uint8Array` wraps above 255; clamp first (bit the sample atlas).
 - The pipeline is verified against generated samples only, not yet a real Mineways export.
