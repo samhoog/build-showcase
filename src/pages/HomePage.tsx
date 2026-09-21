@@ -1,12 +1,12 @@
 import { PlayerLineup } from '../components/PlayerLineup.tsx'
 import { SiteHeader } from '../components/SiteHeader.tsx'
-import { countLabel, type Manifest } from '../data/manifest.ts'
+import { countBuilds, countLabel, type Manifest } from '../data/manifest.ts'
 import styles from './HomePage.module.css'
 import { useTitle } from './useTitle.ts'
 
 export function HomePage({ manifest }: { manifest: Manifest }) {
   useTitle()
-  const builds = manifest.players.reduce((sum, p) => sum + p.builds.length, 0)
+  const builds = countBuilds(manifest)
   const summary = `${countLabel(manifest.players.length, 'player')}, ${countLabel(builds, 'build')}`
 
   return (

@@ -5,7 +5,7 @@ import { Nametag } from '../components/Nametag.tsx'
 import { Notice } from '../components/Notice.tsx'
 import { PlayerFigure } from '../components/PlayerFigure.tsx'
 import { SiteHeader } from '../components/SiteHeader.tsx'
-import { countLabel, findBuild, findPlayer, type Manifest } from '../data/manifest.ts'
+import { coBuilders, countLabel, findBuild, findPlayer, type Manifest } from '../data/manifest.ts'
 import styles from './PlayerPage.module.css'
 import { useTitle } from './useTitle.ts'
 
@@ -64,13 +64,27 @@ export function PlayerPage({ manifest }: { manifest: Manifest }) {
         ) : (
           <div className={styles.builds}>
             {player.builds.map((build, index) => (
-              <BuildCard key={build.slug} player={player} build={build} featured={index === 0} />
+              <BuildCard
+                key={build.slug}
+                player={player}
+                build={build}
+                coBuilders={coBuilders(manifest, build, player)}
+                featured={index === 0}
+              />
             ))}
           </div>
         )}
       </main>
 
-      {open && <BuildViewer key={open.slug} player={player} build={open} onClose={closeViewer} />}
+      {open && (
+        <BuildViewer
+          key={open.slug}
+          player={player}
+          build={open}
+          coBuilders={coBuilders(manifest, open, player)}
+          onClose={closeViewer}
+        />
+      )}
     </div>
   )
 }
