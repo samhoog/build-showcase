@@ -66,6 +66,18 @@ export function findBuild(player: Player, slug: string): Build | undefined {
   return player.builds.find((b) => b.slug === slug)
 }
 
+// everyone else who worked on a build, as seen from one builder's page
+export function coBuilders(manifest: Manifest, build: Build, player: Player): Player[] {
+  return build.builders
+    .filter((username) => username !== player.username)
+    .flatMap((username) => findPlayer(manifest, username) ?? [])
+}
+
+// a shared build is listed under each of its builders but is still one build
+export function countBuilds(manifest: Manifest): number {
+  return new Set(manifest.players.flatMap((p) => p.builds.map((b) => b.file))).size
+}
+
 // [17, 12, 15] -> '17 × 12 × 15 blocks'
 export function formatSize(size: Build['size']): string {
   return `${size.join(' × ')} blocks`
