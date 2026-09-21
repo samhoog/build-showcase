@@ -1,0 +1,13 @@
+.nametag {
+  display: inline-block;
+  max-width: 100%;
+  padding: 0.1em 0.45em 0.15em;
+  overflow: hidden;
+  background: rgb(21 18 30 / 0.78);
+  color: #fff;
+  font-family: var(--font-nametag);
+  font-size: var(--text-md);
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
