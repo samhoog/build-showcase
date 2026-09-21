@@ -6,10 +6,19 @@ export type Skin = { png: Uint8Array; slim: boolean }
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
+// seconds to wait before each retry when Mojang says we're asking too fast
+const RETRY_AFTER = [3, 10]
+
 async function getJson(url: string): Promise<unknown> {
-  const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
-  if (!res.ok) throw new Error(`${url} answered ${res.status}`)
-  return res.json()
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(url, { signal: AbortSignal.timeout(10_000) })
+    if (res.status === 429 && attempt < RETRY_AFTER.length) {
+      await new Promise((resolve) => setTimeout(resolve, RETRY_AFTER[attempt] * 1000))
+      continue
+    }
+    if (!res.ok) throw new Error(`${url} answered ${res.status}`)
+    return res.json()
+  }
 }
 
 // username -> uuid -> profile -> skin texture, all from Mojang's own API
@@ -56,29 +65,43 @@ export function fallbackSkin(): Skin {
   return { png: PNG.sync.write(png), slim: false }
 }
 
-// Writes <dir>/<username>.png and returns whether the model is slim. Downloads at most
-// once a week, and never fails the convert: offline just means the fallback skin.
+type SkinInfo = { slim: boolean; fallback?: boolean }
+
+// Writes <dir>/<username>.png and returns whether the model is slim. A real skin is
+// refreshed at most once a week. A failed lookup never fails the convert and never
+// replaces a real skin: the player keeps the old one, or gets the fallback, and the
+// fallback is retried on every run until the real skin arrives.
 export async function ensureSkin(username: string, dir: string): Promise<{ slim: boolean }> {
   const pngPath = join(dir, `${username}.png`)
   const infoPath = join(dir, `${username}.json`)
 
+  let cached: SkinInfo | null = null
   try {
+    cached = JSON.parse(await readFile(infoPath, 'utf8')) as SkinInfo
     const age = Date.now() - (await stat(pngPath)).mtimeMs
-    if (age < WEEK_MS) return JSON.parse(await readFile(infoPath, 'utf8')) as { slim: boolean }
+    if (!cached.fallback && age < WEEK_MS) return { slim: cached.slim }
   } catch {
-    // not cached yet
+    cached = null
   }
 
   let skin: Skin
+  let fallback = false
   try {
     skin = await fetchSkin(username)
   } catch (err) {
-    console.warn(`  skin for ${username} unavailable (${(err as Error).message}), using fallback`)
+    const reason = (err as Error).message
+    if (cached && !cached.fallback) {
+      console.warn(`  skin for ${username} not refreshed (${reason}), keeping the current one`)
+      return { slim: cached.slim }
+    }
+    console.warn(`  skin for ${username} unavailable (${reason}), using fallback`)
     skin = fallbackSkin()
+    fallback = true
   }
 
   await mkdir(dir, { recursive: true })
   await writeFile(pngPath, skin.png)
-  await writeFile(infoPath, JSON.stringify({ slim: skin.slim }))
+  const info: SkinInfo = fallback ? { slim: skin.slim, fallback } : { slim: skin.slim }
+  await writeFile(infoPath, JSON.stringify(info))
   return { slim: skin.slim }
 }
