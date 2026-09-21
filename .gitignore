@@ -1,0 +1,16 @@
+node_modules
+dist
+*.local
+*.log
+.DS_Store
+
+# Models never go in git: raw Mineways exports and everything generated from them
+models-src/*
+!models-src/README.md
+public/builds/
+public/skins/
+
+# Playwright
+test-results/
+playwright-report/
+e2e/screenshots/
