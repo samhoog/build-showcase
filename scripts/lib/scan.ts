@@ -2,7 +2,13 @@ import { readdir, readFile, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import { isValidUsername, titleFromSlug, toSlug } from './slug.ts'
 
-export type BuildMeta = { title: string; description?: string; builtOn?: string }
+export type BuildMeta = {
+  title: string
+  description?: string
+  builtOn?: string
+  // build.json lists the other builders; the folder's player is always one
+  builders?: string[]
+}
 
 export type BuildSource = {
   slug: string
