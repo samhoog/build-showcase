@@ -32,7 +32,7 @@ async function readJson<T>(path: string): Promise<Partial<T>> {
 }
 
 async function subdirs(dir: string): Promise<string[]> {
-  const entries = await readdir(dir, { withFileTypes: true })
+  const entries = await readdir(dir, { withFileTypes: true }).catch(() => [])
   return entries
     .filter((e) => e.isDirectory())
     .map((e) => e.name)
@@ -58,21 +58,31 @@ async function scanBuild(dir: string, folder: string): Promise<BuildSource | str
   }
 }
 
-// models-src/<username>/<build>/*.obj
-export async function scanSources(root: string): Promise<ScanResult> {
+// Players are everyone on the roster (players.json, committed) plus every username folder
+// under models-src/ (gitignored). The roster is what lets someone appear before they have
+// a build; its spelling wins when a folder differs only by case.
+export async function scanSources(root: string, roster: string[] = []): Promise<ScanResult> {
   const players: PlayerSource[] = []
   const problems: string[] = []
+  const folders = await subdirs(root)
 
-  for (const username of await subdirs(root)) {
-    const dir = join(root, username)
+  const usernames = [...roster]
+  for (const folder of folders) {
+    if (!roster.some((name) => name.toLowerCase() === folder.toLowerCase())) usernames.push(folder)
+  }
+
+  for (const username of usernames) {
     if (!isValidUsername(username)) {
-      problems.push(`${dir}: "${username}" is not a valid Minecraft username, skipped`)
+      problems.push(`"${username}" is not a valid Minecraft username, skipped`)
       continue
     }
 
+    const folder = folders.find((name) => name.toLowerCase() === username.toLowerCase())
+    const dir = join(root, folder ?? username)
     const builds: BuildSource[] = []
-    for (const folder of await subdirs(dir)) {
-      const result = await scanBuild(join(dir, folder), folder)
+    // models-src/<username>/<build>/*.obj
+    for (const build of folder ? await subdirs(dir) : []) {
+      const result = await scanBuild(join(dir, build), build)
       if (typeof result === 'string') problems.push(result)
       else builds.push(result)
     }

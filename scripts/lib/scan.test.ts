@@ -62,4 +62,37 @@ describe('scanSources', () => {
     expect(problems.join('\n')).toMatch(/no \.obj file/)
     expect(problems.join('\n')).toMatch(/more than one \.obj/)
   })
+
+  it('includes roster players who have no folder yet', async () => {
+    await addBuild('jeb_', 'tower', { 't.obj': '' })
+
+    const { players, problems } = await scanSources(root, ['Dsny', 'jeb_'])
+
+    expect(problems).toEqual([])
+    expect(players.map((p) => [p.username, p.builds.length])).toEqual([
+      ['Dsny', 0],
+      ['jeb_', 1],
+    ])
+  })
+
+  it('matches a folder to the roster whatever its case, keeping the roster spelling', async () => {
+    await addBuild('dsny', 'castle', { 'c.obj': '' })
+
+    const { players } = await scanSources(root, ['Dsny'])
+
+    expect(players).toHaveLength(1)
+    expect(players[0].username).toBe('Dsny')
+    expect(players[0].builds.map((b) => b.slug)).toEqual(['castle'])
+  })
+
+  it('works from the roster alone when the sources folder does not exist', async () => {
+    const { players } = await scanSources(join(root, 'missing'), ['Dsny'])
+    expect(players.map((p) => p.username)).toEqual(['Dsny'])
+  })
+
+  it('reports invalid roster names', async () => {
+    const { players, problems } = await scanSources(root, ['no spaces allowed'])
+    expect(players).toEqual([])
+    expect(problems.join()).toMatch(/not a valid Minecraft username/)
+  })
 })
