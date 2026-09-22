@@ -11,6 +11,7 @@ import {
   shareBuilds,
   sortManifest,
 } from './lib/manifest.ts'
+import { DEFAULT_LIGHT } from './lib/bake-light.ts'
 import { readBlockDimensions } from './lib/obj-header.ts'
 import { objToGlb } from './lib/obj-to-glb.ts'
 import { PUBLIC_DIR, ROSTER_FILE, SOURCES_DIR } from './lib/paths.ts'
@@ -36,7 +37,15 @@ async function mtimeMs(path: string): Promise<number> {
 
 async function convertBuild(username: string, source: BuildSource): Promise<Build> {
   const raw = await objToGlb(source.objPath)
-  const { glb, stats } = await optimizeGlb(raw)
+  // prototype: BAKE_LIGHT=notre-dame,colosseum (or all) bakes shader-style lighting
+  const bake = process.env.BAKE_LIGHT?.split(',') ?? []
+  const light = bake.includes('all') || bake.includes(source.slug) ? DEFAULT_LIGHT : undefined
+  const started = Date.now()
+  const { glb, stats } = await optimizeGlb(raw, light)
+  if (light)
+    console.log(
+      `  ${source.slug}: lighting baked in ${((Date.now() - started) / 1000).toFixed(1)}s`,
+    )
   const file = `builds/${username}/${source.slug}.glb`
 
   await mkdir(join(PUBLIC, 'builds', username), { recursive: true })
