@@ -1,13 +1,14 @@
 // npm run convert: models-src/<username>/<build>/ -> public/builds/<username>/<build>.glb,
 // plus player skins and the manifest the site reads. Everything it writes is gitignored.
 import { createHash } from 'node:crypto'
-import { mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import type { Build, Player } from '../shared/manifest.ts'
+import { type Build, isStartView, type Player } from '../shared/manifest.ts'
 import { findBuild, readManifest, shareBuilds, sortManifest } from './lib/manifest.ts'
 import { readBlockDimensions } from './lib/obj-header.ts'
 import { objToGlb } from './lib/obj-to-glb.ts'
 import { PUBLIC_DIR, ROSTER_FILE, SOURCES_DIR } from './lib/paths.ts'
+import { readRoster } from './lib/roster.ts'
 import { optimizeGlb } from './lib/optimize.ts'
 import { type BuildSource, scanSources } from './lib/scan.ts'
 import { ensureSkin } from './lib/skins.ts'
@@ -51,6 +52,18 @@ async function convertBuild(username: string, source: BuildSource): Promise<Buil
   }
 }
 
+// Every build gets a build.json to fill in (or for the camera readout to save into).
+// Never overwrites one; a folder it can't write to just goes without.
+async function ensureBuildJson(source: BuildSource) {
+  try {
+    await writeFile(join(source.dir, 'build.json'), '{}\n', { flag: 'wx' })
+    console.log(`  ${source.slug}: added an empty build.json`)
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException).code
+    if (code !== 'EEXIST') console.warn(`  ${source.slug}: could not add build.json (${code})`)
+  }
+}
+
 // the player whose folder holds the files, then whoever build.json credits
 function withOwner(username: string, source: BuildSource): string[] {
   return [username, ...(source.meta.builders ?? [])]
@@ -82,10 +95,7 @@ async function removeStale(players: Player[]) {
 }
 
 const previous = await readManifest(MANIFEST)
-const roster = await readFile(ROSTER, 'utf8').then(
-  (text) => JSON.parse(text) as string[],
-  () => [],
-)
+const roster = await readRoster(ROSTER)
 const { players: sources, problems } = await scanSources(SOURCES, roster)
 const players: Player[] = []
 let failed = 0
@@ -95,6 +105,13 @@ for (const source of sources) {
   const builds: Build[] = []
 
   for (const build of source.builds) {
+    await ensureBuildJson(build)
+    // a hand-typed view with a mistake in it would put the camera somewhere meaningless
+    if (build.meta.view !== undefined && !isStartView(build.meta.view)) {
+      problems.push(`${join(build.dir, 'build.json')}: "view" is not valid, ignored`)
+      delete build.meta.view
+    }
+
     // unchanged since the last run: keep the previous entry, but pick up build.json edits
     // (a build shared with this player by someone else is theirs, not a previous run of this)
     const own = `builds/${source.username}/${build.slug}.glb`
