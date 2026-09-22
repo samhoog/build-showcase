@@ -23,6 +23,8 @@ export type Build = {
   view?: StartView
   // shown first, full width, on every builder's page
   featured?: boolean
+  // which lighting the model was baked with (see scripts/lib/bake-light.ts)
+  light?: string
   // path relative to the site root
   file: string
   // content hash, appended to the URL so a re-converted build is never served stale

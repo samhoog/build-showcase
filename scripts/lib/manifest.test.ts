@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Build, Player } from '../../shared/manifest.ts'
-import { featuredProblems, shareBuilds, sortManifest } from './manifest.ts'
+import { featuredProblems, isUpToDate, shareBuilds, sortManifest } from './manifest.ts'
 
 function build(title: string, builtOn?: string, builders: string[] = []): Build {
   return {
@@ -124,5 +124,25 @@ describe('featured builds', () => {
     expect(problems[0]).toMatch(
       /^Dsny has 2 featured builds \(Colosseum, Notre Dame\): only Colosseum/,
     )
+  })
+})
+
+describe('isUpToDate', () => {
+  const known = { ...build('castle'), file: 'builds/Dsny/castle.glb', light: 'aaaa1111' }
+
+  it('keeps a model that is newer than its sources and baked with the same lighting', () => {
+    expect(isUpToDate(known, 'builds/Dsny/castle.glb', 200, 100, 'aaaa1111')).toBe(true)
+  })
+
+  it('reconverts when the lighting changed, or the model was never lit', () => {
+    expect(isUpToDate(known, 'builds/Dsny/castle.glb', 200, 100, 'bbbb2222')).toBe(false)
+    const unlit = { ...known, light: undefined }
+    expect(isUpToDate(unlit, 'builds/Dsny/castle.glb', 200, 100, 'aaaa1111')).toBe(false)
+  })
+
+  it("reconverts when the export is newer, or the entry was someone else's shared build", () => {
+    expect(isUpToDate(known, 'builds/Dsny/castle.glb', 100, 200, 'aaaa1111')).toBe(false)
+    expect(isUpToDate(known, 'builds/jw01/castle.glb', 200, 100, 'aaaa1111')).toBe(false)
+    expect(isUpToDate(undefined, 'builds/Dsny/castle.glb', 200, 100, 'aaaa1111')).toBe(false)
   })
 })

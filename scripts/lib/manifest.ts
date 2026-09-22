@@ -82,3 +82,15 @@ export function featuredProblems(players: Player[]): string[] {
     ]
   })
 }
+
+// A build can keep its previous conversion when the model file is its own (not a shared
+// build of someone else's), newer than every source file, and baked with today's lighting
+export function isUpToDate(
+  known: Build | undefined,
+  own: string,
+  glbMtimeMs: number,
+  newestSourceMs: number,
+  light: string,
+): known is Build {
+  return known?.file === own && glbMtimeMs > newestSourceMs && known.light === light
+}
