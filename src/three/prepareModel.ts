@@ -9,6 +9,7 @@ import {
   type Object3D,
   Vector3,
 } from 'three'
+import { bakedLightMaterial } from './bakedLightMaterial.ts'
 import type { Bounds } from './framing.ts'
 
 export type PreparedModel = {
@@ -19,13 +20,7 @@ export type PreparedModel = {
 
 // Matte material with crisp pixel-art sampling. Lambert is much cheaper than the PBR
 // material GLTFLoader creates, and blocks have no use for PBR anyway.
-function toBlockMaterial(source: MeshStandardMaterial, maxAnisotropy: number): MeshLambertMaterial {
-  if (source.map) {
-    source.map.magFilter = NearestFilter
-    source.map.minFilter = LinearMipmapLinearFilter
-    source.map.anisotropy = Math.min(4, maxAnisotropy)
-    source.map.needsUpdate = true
-  }
+function toBlockMaterial(source: MeshStandardMaterial): MeshLambertMaterial {
   return new MeshLambertMaterial({
     name: source.name,
     map: source.map,
@@ -39,8 +34,17 @@ function toBlockMaterial(source: MeshStandardMaterial, maxAnisotropy: number): M
   })
 }
 
+function crispTexture(source: MeshStandardMaterial, maxAnisotropy: number) {
+  if (!source.map) return
+  source.map.magFilter = NearestFilter
+  source.map.minFilter = LinearMipmapLinearFilter
+  source.map.anisotropy = Math.min(4, maxAnisotropy)
+  source.map.needsUpdate = true
+}
+
 export function prepareModel(object: Object3D, maxAnisotropy: number): PreparedModel {
-  const converted = new Map<Material, MeshLambertMaterial>()
+  // keyed by source material and whether the mesh carries baked light
+  const converted = new Map<string, { source: Material; material: Material }>()
   const meshes: Mesh[] = []
 
   object.traverse((child) => {
@@ -48,8 +52,15 @@ export function prepareModel(object: Object3D, maxAnisotropy: number): PreparedM
     if (!mesh.isMesh) return
     meshes.push(mesh)
     const source = mesh.material as MeshStandardMaterial
-    if (!converted.has(source)) converted.set(source, toBlockMaterial(source, maxAnisotropy))
-    mesh.material = converted.get(source)!
+    // GLTFLoader lower-cases custom attributes: _LIGHT arrives as _light
+    const baked = mesh.geometry.hasAttribute('_light')
+    const key = `${source.uuid}:${baked}`
+    if (!converted.has(key)) {
+      crispTexture(source, maxAnisotropy)
+      const material = baked ? bakedLightMaterial(source) : toBlockMaterial(source)
+      converted.set(key, { source, material })
+    }
+    mesh.material = converted.get(key)!.material
     // translucent blocks draw after everything else
     if (source.transparent) mesh.renderOrder = 1
   })
@@ -64,8 +75,8 @@ export function prepareModel(object: Object3D, maxAnisotropy: number): PreparedM
 
   const dispose = () => {
     for (const mesh of meshes) mesh.geometry.dispose()
-    for (const [source, material] of converted) {
-      material.map?.dispose()
+    for (const { source, material } of converted.values()) {
+      ;(source as MeshStandardMaterial).map?.dispose()
       material.dispose()
       source.dispose()
     }

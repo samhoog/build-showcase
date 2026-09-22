@@ -43,6 +43,7 @@
     "oxlint": "^1.85.0",
     "pngjs": "^7.0.0",
     "prettier": "^3.9.8",
+    "three-mesh-bvh": "^0.9.15",
     "typescript": "~6.0.2",
     "vite": "^8.3.0",
     "vitest": "^5.0.1"

@@ -2,6 +2,7 @@ import { type Document, Logger, NodeIO } from '@gltf-transform/core'
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
 import { dedup, flatten, getBounds, join, meshopt, prune, weld } from '@gltf-transform/functions'
 import { MeshoptDecoder, MeshoptEncoder } from 'meshoptimizer'
+import { bakeLight, type LightSettings } from './bake-light.ts'
 
 export type GlbStats = {
   triangles: number
@@ -39,7 +40,10 @@ function countTriangles(document: Document): number {
   return triangles
 }
 
-export async function optimizeGlb(glb: Uint8Array): Promise<{ glb: Uint8Array; stats: GlbStats }> {
+export async function optimizeGlb(
+  glb: Uint8Array,
+  light?: LightSettings,
+): Promise<{ glb: Uint8Array; stats: GlbStats }> {
   await MeshoptEncoder.ready
   const document = await io.readBinary(glb)
   document.setLogger(new Logger(Logger.Verbosity.WARN))
@@ -54,6 +58,9 @@ export async function optimizeGlb(glb: Uint8Array): Promise<{ glb: Uint8Array; s
     triangles: countTriangles(document),
     size: [0, 1, 2].map((i) => Math.round(max[i] - min[i])) as GlbStats['size'],
   }
+
+  // baked after welding (fewer vertices) and before quantizing (exact positions)
+  if (light) await bakeLight(document, light)
 
   // 16-bit UVs keep tile edges exact on large texture atlases; textures are never touched
   await document.transform(meshopt({ encoder: MeshoptEncoder, quantizeTexcoord: 16 }))
