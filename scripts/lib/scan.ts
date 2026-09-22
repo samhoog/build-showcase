@@ -10,6 +10,7 @@ export type BuildMeta = {
   // build.json lists the other builders; the folder's player is always one
   builders?: string[]
   view?: StartView
+  featured?: boolean
 }
 
 export type BuildSource = {

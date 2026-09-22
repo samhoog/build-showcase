@@ -21,6 +21,8 @@ export type Build = {
   builders: string[]
   // custom starting camera from build.json, else the default three-quarter view
   view?: StartView
+  // shown first, full width, on every builder's page
+  featured?: boolean
   // path relative to the site root
   file: string
   // content hash, appended to the URL so a re-converted build is never served stale
