@@ -8,7 +8,7 @@ import { MeshoptDecoder } from 'meshoptimizer'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { drawAtlas } from '../sample/atlas.ts'
 import { VoxelGrid, voxelsToObj } from '../sample/voxel-obj.ts'
-import { bakeLight, DEFAULT_LIGHT, sunDirection } from './bake-light.ts'
+import { bakeLight, DEFAULT_LIGHT, lightKey, sunDirection } from './bake-light.ts'
 import { objToGlb } from './obj-to-glb.ts'
 import { optimizeGlb } from './optimize.ts'
 
@@ -103,5 +103,11 @@ describe('bakeLight', () => {
       .listMeshes()
       .flatMap((m) => m.listPrimitives())
     expect(prims.every((p) => p.getAttribute('_LIGHT') === null)).toBe(true)
+  })
+
+  it('names each lighting setup, so a change to the sun rebakes every model', () => {
+    expect(lightKey()).toBe(lightKey({ ...DEFAULT_LIGHT }))
+    expect(lightKey()).not.toBe(lightKey({ ...DEFAULT_LIGHT, sun: sunDirection(0, 60) }))
+    expect(lightKey()).toMatch(/^[0-9a-f]{8}$/)
   })
 })

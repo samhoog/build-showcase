@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { availableParallelism } from 'node:os'
 import { Worker } from 'node:worker_threads'
 import { type Document, type Primitive } from '@gltf-transform/core'
@@ -15,6 +16,16 @@ export const DEFAULT_LIGHT: LightSettings = {
   sunRays: 4,
   skyRays: 24,
   reach: 8,
+}
+
+// bump when the bake itself changes (not just its settings), so every model is rebaked
+const BAKE_VERSION = 1
+
+// Names the lighting a model was baked with. Convert stores it per build and rebakes any
+// build whose key differs, so changing the sun or the bake rebakes everything once.
+export function lightKey(settings: LightSettings = DEFAULT_LIGHT): string {
+  const json = JSON.stringify({ v: BAKE_VERSION, ...settings })
+  return createHash('sha1').update(json).digest('hex').slice(0, 8)
 }
 
 // degrees, measured the same way as a build's camera view
