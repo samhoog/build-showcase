@@ -18,15 +18,18 @@ export function findBuild(
 }
 
 // players with the most builds first, ties A-Z ignoring case;
-// builds newest first, undated ones last, then by title
+// builds: a featured one first (it gets the full-width slot), then newest first, undated
+// ones last, then by title
 export function sortManifest(players: Player[]): Player[] {
   const byBuildCount = (a: Player, b: Player) =>
     b.builds.length - a.builds.length ||
     a.username.toLowerCase().localeCompare(b.username.toLowerCase())
-  const byDate = (a: Build, b: Build) =>
-    (b.builtOn ?? '').localeCompare(a.builtOn ?? '') || a.title.localeCompare(b.title)
+  const byOrder = (a: Build, b: Build) =>
+    Number(b.featured === true) - Number(a.featured === true) ||
+    (b.builtOn ?? '').localeCompare(a.builtOn ?? '') ||
+    a.title.localeCompare(b.title)
 
-  return players.map((p) => ({ ...p, builds: [...p.builds].sort(byDate) })).sort(byBuildCount)
+  return players.map((p) => ({ ...p, builds: [...p.builds].sort(byOrder) })).sort(byBuildCount)
 }
 
 // Lists every shared build under each of its builders. Going in, a build sits only under
@@ -65,4 +68,17 @@ export function shareBuilds(players: Player[]): { players: Player[]; problems: s
   }
 
   return { players: players.map((p) => ({ ...p, builds: shared.get(p.username)! })), problems }
+}
+
+// Only one build per page gets the full-width slot. A player can end up with two featured
+// builds, e.g. their own plus a shared one flagged in someone else's build.json.
+export function featuredProblems(players: Player[]): string[] {
+  return players.flatMap((player) => {
+    const featured = player.builds.filter((b) => b.featured === true).map((b) => b.title)
+    if (featured.length < 2) return []
+    return [
+      `${player.username} has ${featured.length} featured builds (${featured.join(', ')}): ` +
+        `only ${featured[0]} gets the full-width slot, keep "featured" on one`,
+    ]
+  })
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Build, Player } from '../../shared/manifest.ts'
-import { shareBuilds, sortManifest } from './manifest.ts'
+import { featuredProblems, shareBuilds, sortManifest } from './manifest.ts'
 
 function build(title: string, builtOn?: string, builders: string[] = []): Build {
   return {
@@ -92,5 +92,37 @@ describe('shareBuilds', () => {
     expect(problems[0]).toMatch(/jw01 already has a build called "castle"/)
     expect(players[1].builds).toHaveLength(1)
     expect(players[0].builds[0].builders).toEqual(['Dsny'])
+  })
+})
+
+describe('featured builds', () => {
+  const featured = (b: Build): Build => ({ ...b, featured: true })
+
+  it('puts the featured build first, ahead of newer ones, and leaves the rest in order', () => {
+    const [p] = sortManifest([
+      player('Dsny', [
+        build('Colosseum', '2026-09-01'),
+        featured(build('Notre Dame', '2025-01-01')),
+        build('Barad-dur'),
+        build('Castle', '2026-03-01'),
+      ]),
+    ])
+    expect(p.builds.map((b) => b.title)).toEqual(['Notre Dame', 'Colosseum', 'Castle', 'Barad-dur'])
+  })
+
+  it('warns when a player has more than one featured build', () => {
+    const sorted = sortManifest([
+      player('Dsny', [
+        featured(build('Notre Dame')),
+        featured(build('Colosseum')),
+        build('Castle'),
+      ]),
+      player('jw01', [featured(build('Hut'))]),
+    ])
+    const problems = featuredProblems(sorted)
+    expect(problems).toHaveLength(1)
+    expect(problems[0]).toMatch(
+      /^Dsny has 2 featured builds \(Colosseum, Notre Dame\): only Colosseum/,
+    )
   })
 })
