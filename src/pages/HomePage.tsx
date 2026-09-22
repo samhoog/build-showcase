@@ -13,7 +13,7 @@ export function HomePage({ manifest }: { manifest: Manifest }) {
     <div className="page">
       <SiteHeader summary={summary} />
       <main>
-        <h1 className={styles.heading}>Who built what</h1>
+        <h1 className={styles.heading}>The builders</h1>
         <p className={styles.intro}>Pick a player to walk around everything they've built.</p>
         <PlayerLineup players={manifest.players} />
       </main>

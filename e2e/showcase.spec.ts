@@ -56,7 +56,7 @@ test.beforeEach(async ({ page }) => {
 
 test('home page lines up every player as a link with a 3D figure', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('heading', { level: 1, name: 'Who built what' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'The builders' })).toBeVisible()
 
   const jeb = page.getByRole('link', { name: /jeb_.*3 builds/ })
   // Notch has two builds of his own plus the bridge he shared with jeb_
