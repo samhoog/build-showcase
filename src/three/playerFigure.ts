@@ -76,10 +76,13 @@ export async function createPlayerFigure(
   player.ears.visible = false
 
   const { head, leftArm, rightArm } = player.skin
+  // where the right shoulder joint rests; the wave slides it outward a little
+  const shoulderX = rightArm.position.x
   let time = phase
   let yaw = 0
   let pitch = 0
   let wave = 0
+  let wavePhase = 0
 
   return {
     addTo(scene) {
@@ -91,7 +94,10 @@ export async function createPlayerFigure(
     update(dt, { look, waving, reducedMotion }) {
       time += dt
       const idle = reducedMotion ? 0 : 1
-      const target = look ?? { x: Math.sin(time * 0.5) * 0.35 * idle, y: 0 }
+      // whoever gets waved at gets looked at, which also keeps the head clear of the arm
+      const target = waving
+        ? { x: 0, y: 0 }
+        : (look ?? { x: Math.sin(time * 0.5) * 0.35 * idle, y: 0 })
       // dt is never negative (see frameDelta), so this stays within 0..1 and always settles
       const ease = 1 - Math.exp(-dt * 9)
       const before = yaw + pitch + wave
@@ -99,18 +105,27 @@ export async function createPlayerFigure(
       yaw += (MathUtils.clamp(target.x, -1, 1) * 0.95 - yaw) * ease
       pitch += (MathUtils.clamp(target.y, -1, 1) * 0.5 - pitch) * ease
       wave += ((waving ? 1 : 0) - wave) * ease
+      // each wave starts from straight up: the phase only runs while the arm is up
+      wavePhase = wave < 0.01 ? 0 : wavePhase + dt * 8
 
       head.rotation.set(pitch, yaw, 0)
       player.rotation.y = yaw * 0.3
 
-      // arms breathe a little; the right one swings overhead to wave
+      // arms breathe a little
       const breath = Math.sin(time * 1.7) * 0.025 * idle
       leftArm.rotation.set(Math.sin(time * 0.9) * 0.04 * idle, 0, 0.05 + breath)
-      rightArm.rotation.set(
-        Math.PI * 0.97 * wave - Math.sin(time * 0.9) * 0.04 * idle * (1 - wave),
-        0,
-        -(0.05 + breath) * (1 - wave) + Math.sin(time * 9) * 0.35 * wave * idle,
-      )
+
+      // The right arm lifts forwards, in front of the body, about x: that keeps it in its own
+      // column beside the torso. Only then does it wave, outward only, between straight up
+      // and up-and-out; tilting inward would put the hand through the head.
+      const lift = -Math.PI * 0.95 * wave
+      const out = -0.25 * (1 - Math.cos(wavePhase)) * wave * wave * idle
+      const tilt = out - (0.05 + breath) * (1 - wave)
+      rightArm.rotation.set(lift - Math.sin(time * 0.9) * 0.04 * idle * (1 - wave), 0, tilt)
+      // Minecraft's shoulder joint sits 2px below the top of the arm and 1px in from its
+      // inner edge, so tilting out swings that top corner (cos - 2 sin from the joint) into
+      // the body. Slide the arm out by exactly the overlap.
+      rightArm.position.x = shoulderX - Math.max(0, Math.cos(tilt) - 2 * Math.sin(tilt) - 1)
 
       const settling = Math.abs(yaw + pitch + wave - before) > 1e-4
       return !reducedMotion || settling
