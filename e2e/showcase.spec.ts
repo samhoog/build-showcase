@@ -130,7 +130,7 @@ test("a shared build shows on every builder's page, credits the others, and is o
   expect(downloads).toHaveLength(1)
 })
 
-test('cards hold still until someone moves them, and say they can be opened', async ({ page }) => {
+test('cards are still pictures that say they can be opened', async ({ page }) => {
   await page.goto('/p/Notch')
   const card = page.getByRole('article').first()
   const canvas = card.locator('canvas')
@@ -184,11 +184,11 @@ test('a build link opens straight into the viewer', async ({ page }) => {
   await expect(page.getByRole('article')).toHaveCount(3)
 })
 
-test('dragging a card with the mouse orbits it instead of opening it', async ({
+test('dragging across a card does not turn it; turning is for the viewer', async ({
   page,
   isMobile,
 }) => {
-  test.skip(isMobile, 'touch never orbits a card')
+  test.skip(isMobile, 'a mouse drag')
   await page.goto('/p/jeb_')
   const canvas = page.getByRole('article').first().locator('canvas')
   await expectDrawn(canvas)
@@ -199,13 +199,14 @@ test('dragging a card with the mouse orbits it instead of opening it', async ({
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
   await page.mouse.down()
   await page.mouse.move(box.x + box.width / 2 + 200, box.y + box.height / 2 + 30, { steps: 8 })
-  await expect(canvas).toHaveCSS('cursor', 'grabbing')
-  await page.mouse.up()
-  await expect(canvas).toHaveCSS('cursor', 'pointer')
   await page.waitForTimeout(800)
+  // still the same picture, and no grab hand: there is nothing to drag
+  expect(await pixelsOf(canvas)).toBe(before)
+  await expect(canvas).toHaveCSS('cursor', 'pointer')
 
-  await expect(page).toHaveURL(/\/p\/jeb_$/)
-  expect(await pixelsOf(canvas)).not.toBe(before)
+  // letting go on the card is a click, which opens it
+  await page.mouse.up()
+  await expect(page).toHaveURL(/\/p\/jeb_\/watchtower$/)
 })
 
 test('keyboard turns and resets the build in the viewer', async ({ page }) => {
@@ -314,7 +315,8 @@ test('touch scrolling is left to the page on cards, and taken over in the viewer
   await page.goto('/p/jeb_')
   const card = page.getByRole('article').first().locator('canvas')
   await expectDrawn(card)
-  await expect(card).toHaveCSS('touch-action', 'pan-y')
+  // cards have no controls on the page, so touch keeps its normal meaning: scroll, pinch
+  await expect(card).toHaveCSS('touch-action', 'auto')
 
   await page.goto('/p/jeb_/watchtower')
   await expect(page.getByRole('dialog').locator('canvas')).toHaveCSS('touch-action', 'none')
