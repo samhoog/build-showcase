@@ -4,7 +4,13 @@ import { createHash } from 'node:crypto'
 import { mkdir, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { type Build, isStartView, type Player } from '../shared/manifest.ts'
-import { findBuild, readManifest, shareBuilds, sortManifest } from './lib/manifest.ts'
+import {
+  featuredProblems,
+  findBuild,
+  readManifest,
+  shareBuilds,
+  sortManifest,
+} from './lib/manifest.ts'
 import { readBlockDimensions } from './lib/obj-header.ts'
 import { objToGlb } from './lib/obj-to-glb.ts'
 import { PUBLIC_DIR, ROSTER_FILE, SOURCES_DIR } from './lib/paths.ts'
@@ -111,6 +117,11 @@ for (const source of sources) {
       problems.push(`${join(build.dir, 'build.json')}: "view" is not valid, ignored`)
       delete build.meta.view
     }
+    // "featured": "yes" would read as true in JS; only a real boolean counts
+    if (build.meta.featured !== undefined && typeof build.meta.featured !== 'boolean') {
+      problems.push(`${join(build.dir, 'build.json')}: "featured" must be true or false, ignored`)
+      delete build.meta.featured
+    }
 
     // unchanged since the last run: keep the previous entry, but pick up build.json edits
     // (a build shared with this player by someone else is theirs, not a previous run of this)
@@ -118,13 +129,14 @@ for (const source of sources) {
     const known = findBuild(previous, source.username, build.slug)
     if (known?.file === own && (await mtimeMs(join(PUBLIC, own))) > build.newestMtimeMs) {
       // spelled out so a field removed from build.json also leaves the manifest
-      const { description, builtOn, view } = build.meta
+      const { description, builtOn, view, featured } = build.meta
       builds.push({
         ...known,
         ...build.meta,
         description,
         builtOn,
         view,
+        featured,
         builders: withOwner(source.username, build),
       })
       console.log(`  ${build.slug}: up to date`)
@@ -152,7 +164,9 @@ await mkdir(join(PUBLIC, 'builds'), { recursive: true })
 // shared builds go under every builder before sorting, so they count towards each total
 const shared = shareBuilds(players)
 problems.push(...shared.problems)
-const manifest = { generatedAt: new Date().toISOString(), players: sortManifest(shared.players) }
+const sorted = sortManifest(shared.players)
+problems.push(...featuredProblems(sorted))
+const manifest = { generatedAt: new Date().toISOString(), players: sorted }
 await writeFile(MANIFEST, JSON.stringify(manifest, null, 2))
 await removeStale(players)
 
