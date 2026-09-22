@@ -20,8 +20,6 @@ export const LIGHT = {
   // the filmic curve mutes colour a little; win it back
   saturation: { value: 1.15 },
 }
-// temporary, for tuning the look from the browser console
-if (import.meta.env.DEV) (window as unknown as { __light: typeof LIGHT }).__light = LIGHT
 
 // light-emitting blocks ignore shadow and stay bright
 const GLOWING =
