@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { setBuildView } from '../../shared/manifest.ts'
 import { BuildCard } from '../components/BuildCard.tsx'
 import { BuildViewer } from '../components/BuildViewer.tsx'
 import { Nametag } from '../components/Nametag.tsx'
@@ -83,6 +84,9 @@ export function PlayerPage({ manifest }: { manifest: Manifest }) {
           build={open}
           coBuilders={coBuilders(manifest, open, player)}
           onClose={closeViewer}
+          // the loaded manifest is shared, so every card for this build (on any builder's
+          // page) starts from the saved view without a reload
+          onViewSaved={(view) => setBuildView(manifest, open.file, view)}
         />
       )}
     </div>

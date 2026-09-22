@@ -59,20 +59,20 @@
   top: calc(max(var(--space-3), env(safe-area-inset-top)) + 2.75rem + var(--space-2));
   left: max(var(--space-3), env(safe-area-inset-left));
   max-width: calc(100% - 2 * var(--space-3));
-  display: grid;
-  grid-template-columns: auto auto 1fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   background: var(--fog);
   font-size: var(--text-sm);
 }
 
-.readout p {
-  grid-column: 1 / -1;
+.readout p,
+.readout pre {
+  flex-basis: 100%;
 }
 
 .readout pre {
-  grid-column: 1 / -1;
   margin: 0;
   overflow-x: auto;
   font-size: var(--text-sm);

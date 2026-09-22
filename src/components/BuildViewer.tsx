@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { StartView } from '../../shared/manifest.ts'
 import { assetUrl, type Build, formatSize, type Player } from '../data/manifest.ts'
+import { saveView } from '../data/saveView.ts'
 import { Stage } from '../stage/Stage.ts'
 import { useViewport } from '../stage/useViewport.ts'
 import { acquireBuild, releaseBuild } from '../three/buildCache.ts'
@@ -9,12 +10,24 @@ import { BuiltWith } from './BuiltWith.tsx'
 import styles from './BuildViewer.module.css'
 
 type Status = 'loading' | 'ready' | 'error'
-type Props = { player: Player; build: Build; coBuilders: Player[]; onClose: () => void }
+type SaveState =
+  | { status: 'idle' }
+  | { status: 'saving' }
+  | { status: 'saved'; path: string }
+  | { status: 'failed'; message: string }
+type Props = {
+  player: Player
+  build: Build
+  coBuilders: Player[]
+  onClose: () => void
+  // called after the camera readout saved a new starting view (dev server only)
+  onViewSaved?: (view: StartView) => void
+}
 
 const STEP = Math.PI / 24
 
 // One build, full screen: orbit, zoom and pan by mouse, touch or keyboard
-export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
+export function BuildViewer({ player, build, coBuilders, onClose, onViewSaved }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const viewRef = useRef<BuildView | null>(null)
@@ -26,6 +39,7 @@ export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
   const [readout, setReadout] = useState(() => new URLSearchParams(location.search).has('camera'))
   const readoutRef = useRef(readout)
   const [camera, setCamera] = useState<StartView | null>(null)
+  const [save, setSave] = useState<SaveState>({ status: 'idle' })
   const url = assetUrl(build.file, build.hash)
 
   useEffect(() => {
@@ -53,7 +67,10 @@ export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
       viewRef.current = view
       view.controls.addEventListener('start', () => setTouched(true))
       view.controls.addEventListener('change', () => {
-        if (readoutRef.current) setCamera(view.describeView())
+        if (!readoutRef.current) return
+        setCamera(view.describeView())
+        // "saved" describes the view as it was saved; moving on makes it out of date
+        setSave({ status: 'idle' })
       })
       Stage.get().setExclusive(viewport)
       return () => {
@@ -86,7 +103,26 @@ export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
       cancelled = true
       releaseBuild(url)
     }
-  }, [url, attempt, build.view])
+    // build.view is only where the camera starts: a view saved from here updates Reset
+    // through setStart, and must not reload the model and move the camera
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url, attempt])
+
+  const saveCamera = async () => {
+    // a Save straight after a drag should save where the camera comes to rest
+    viewRef.current?.settle()
+    const view = viewRef.current?.describeView()
+    if (!view) return
+    setSave({ status: 'saving' })
+    try {
+      const path = await saveView(build.file, view)
+      viewRef.current?.setStart(view)
+      onViewSaved?.(view)
+      setSave({ status: 'saved', path })
+    } catch (err) {
+      setSave({ status: 'failed', message: (err as Error).message })
+    }
+  }
 
   const onKeyDown = (event: React.KeyboardEvent) => {
     const view = viewRef.current
@@ -148,6 +184,16 @@ export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
             Starting view for <code>build.json</code>:
           </p>
           <pre>{`"view": ${JSON.stringify(camera)}`}</pre>
+          {import.meta.env.DEV && (
+            <button
+              type="button"
+              className={styles.button}
+              onClick={saveCamera}
+              disabled={save.status === 'saving'}
+            >
+              Save to build.json
+            </button>
+          )}
           <button
             type="button"
             className={styles.button}
@@ -158,6 +204,12 @@ export function BuildViewer({ player, build, coBuilders, onClose }: Props) {
           <button type="button" className={styles.button} onClick={() => setReadout(false)}>
             Hide
           </button>
+          {save.status === 'saved' && (
+            <p role="status">
+              Saved to <code>{save.path}</code>. Cards and Reset view start here now.
+            </p>
+          )}
+          {save.status === 'failed' && <p role="alert">Couldn't save: {save.message}</p>}
         </div>
       )}
 
