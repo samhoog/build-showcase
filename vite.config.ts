@@ -2,6 +2,8 @@ import { copyFile } from 'node:fs/promises'
 import react from '@vitejs/plugin-react'
 import type { Plugin } from 'vite'
 import { defineConfig } from 'vitest/config'
+import { PUBLIC_DIR } from './scripts/lib/paths.ts'
+import { saveViewEndpoint } from './scripts/save-view-endpoint.ts'
 
 // the e2e tests build a sandboxed copy of the site from .e2e/ (see playwright.config.ts)
 const outDir = process.env.OUT_DIR ?? 'dist'
@@ -19,9 +21,9 @@ function spaFallback(): Plugin {
 // BASE_PATH lets the site be hosted under a sub-path (e.g. /build-showcase/)
 export default defineConfig({
   base: process.env.BASE_PATH ?? '/',
-  publicDir: process.env.PUBLIC_DIR ?? 'public',
+  publicDir: PUBLIC_DIR,
   build: { outDir },
-  plugins: [react(), spaFallback()],
+  plugins: [react(), spaFallback(), saveViewEndpoint()],
   // unit tests only; e2e/ belongs to Playwright
-  test: { include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'] },
+  test: { include: ['src/**/*.test.ts', 'scripts/**/*.test.ts', 'shared/**/*.test.ts'] },
 })
