@@ -63,21 +63,21 @@ runtime; skins are downloaded from Mojang at convert time.
 
 ### Pipeline (`scripts/`)
 
-| File                    | Purpose                                                                                                                                                                                     | Key exports                                   |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| `convert.ts`            | entry point for `npm run convert`; incremental, never fails on one bad build; adds an empty `build.json` where one is missing; removes models and skins of builds and players that are gone | -                                             |
-| `save-view-endpoint.ts` | Vite plugin, `apply: 'serve'`: `POST /__save-view` for the camera readout's Save button. Dev server only                                                                                    | `saveViewEndpoint`                            |
-| `lib/paths.ts`          | `SOURCES_DIR`, `PUBLIC_DIR`, `ROSTER_FILE`, overridable by env so e2e can sandbox itself                                                                                                    | -                                             |
-| `lib/roster.ts`         | reads `players.json`                                                                                                                                                                        | `readRoster`                                  |
-| `lib/scan.ts`           | merges the roster with `models-src/<username>/<build>/*.obj` folders, reads `build.json` / `player.json`; dates a build by its model files only                                             | `scanSources`                                 |
-| `lib/slug.ts`           | username validation, folder name -> slug / title                                                                                                                                            | `isValidUsername`, `toSlug`, `titleFromSlug`  |
-| `lib/obj-header.ts`     | a build's size in blocks, from Mineways' OBJ header (measuring the mesh is off by one)                                                                                                      | `readBlockDimensions`                         |
-| `lib/obj-to-glb.ts`     | OBJ + MTL + PNG -> GLB via obj2gltf                                                                                                                                                         | `objToGlb`                                    |
-| `lib/optimize.ts`       | alpha modes, dedup/join/weld, meshopt; reports triangles and measured size                                                                                                                  | `optimizeGlb`, `GlbStats`                     |
-| `lib/skins.ts`          | username -> skin PNG from Mojang; real skins cached a week, 429s retried, fallbacks retried every run and never written over a real skin                                                    | `ensureSkin`, `fetchSkin`                     |
-| `lib/manifest.ts`       | read the previous manifest, list shared builds under every builder, sort                                                                                                                    | `readManifest`, `shareBuilds`, `sortManifest` |
-| `lib/save-view.ts`      | writes a `view` into a build's `build.json` and the manifest; finds the folder by scanning, never from request input                                                                        | `saveView`, `SaveViewError`                   |
-| `sample/*`              | e2e fixture only: procedural voxel builds in Mineways' OBJ layout                                                                                                                           | `VoxelGrid`, `voxelsToObj`, `drawAtlas`       |
+| File                    | Purpose                                                                                                                                                                                     | Key exports                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `convert.ts`            | entry point for `npm run convert`; incremental, never fails on one bad build; adds an empty `build.json` where one is missing; removes models and skins of builds and players that are gone | -                                                                 |
+| `save-view-endpoint.ts` | Vite plugin, `apply: 'serve'`: `POST /__save-view` for the camera readout's Save button. Dev server only                                                                                    | `saveViewEndpoint`                                                |
+| `lib/paths.ts`          | `SOURCES_DIR`, `PUBLIC_DIR`, `ROSTER_FILE`, overridable by env so e2e can sandbox itself                                                                                                    | -                                                                 |
+| `lib/roster.ts`         | reads `players.json`                                                                                                                                                                        | `readRoster`                                                      |
+| `lib/scan.ts`           | merges the roster with `models-src/<username>/<build>/*.obj` folders, reads `build.json` / `player.json`; dates a build by its model files only                                             | `scanSources`                                                     |
+| `lib/slug.ts`           | username validation, folder name -> slug / title                                                                                                                                            | `isValidUsername`, `toSlug`, `titleFromSlug`                      |
+| `lib/obj-header.ts`     | a build's size in blocks, from Mineways' OBJ header (measuring the mesh is off by one)                                                                                                      | `readBlockDimensions`                                             |
+| `lib/obj-to-glb.ts`     | OBJ + MTL + PNG -> GLB via obj2gltf                                                                                                                                                         | `objToGlb`                                                        |
+| `lib/optimize.ts`       | alpha modes, dedup/join/weld, meshopt; reports triangles and measured size                                                                                                                  | `optimizeGlb`, `GlbStats`                                         |
+| `lib/skins.ts`          | username -> skin PNG from Mojang; real skins cached a week, 429s retried, fallbacks retried every run and never written over a real skin                                                    | `ensureSkin`, `fetchSkin`                                         |
+| `lib/manifest.ts`       | read the previous manifest, list shared builds under every builder, sort (featured first, then newest), warn about two featured builds                                                      | `readManifest`, `shareBuilds`, `sortManifest`, `featuredProblems` |
+| `lib/save-view.ts`      | writes a `view` into a build's `build.json` and the manifest; finds the folder by scanning, never from request input                                                                        | `saveView`, `SaveViewError`                                       |
+| `sample/*`              | e2e fixture only: procedural voxel builds in Mineways' OBJ layout                                                                                                                           | `VoxelGrid`, `voxelsToObj`, `drawAtlas`                           |
 
 ### Shared (`shared/`)
 
@@ -114,6 +114,8 @@ must go through `assetUrl()` (it applies `BASE_PATH` and the cache-busting `hash
 A shared build is one file listed under each of its `builders` (`shareBuilds` in
 `scripts/lib/manifest.ts`), so count builds with `countBuilds()` (unique files), never by
 summing players' lists, and treat every builder the same: there is no visible "owner".
+A player's first build is the featured one (`featured: true`, else the newest): the page
+gives `index === 0` the full-width slot, so ordering lives in `sortManifest`, not the page.
 `size` is whole blocks `[x, y, z]`, valid because Mineways exports one unit per block.
 
 ## Testing Patterns

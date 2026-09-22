@@ -15,11 +15,19 @@ models-src/
       *.png                    whatever textures the .mtl points at
       build.json               optional: { "title": "...", "description": "...", "builtOn": "2026-08-01",
                                            "builders": ["mason31", "jw01"],
-                                           "view": { "azimuth": 80, "elevation": 24, "zoom": 1.2 } }
+                                           "view": { "azimuth": 80, "elevation": 24, "zoom": 1.2 },
+                                           "featured": true }
 ```
 
 Then run `npm run convert`. Only builds whose files changed are converted again, and any build
 without a `build.json` gets an empty one (`{}`) to fill in. An existing one is never touched.
+
+## Order on a player's page
+
+A build with `"featured": true` comes first and gets the full-width slot. The rest follow
+newest first by `builtOn`, then undated ones alphabetically by title. Keep `featured` on one
+build per player; convert warns if a player ends up with two. A featured shared build is
+featured on every builder's page.
 
 ## Choosing where the camera starts
 
