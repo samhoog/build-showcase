@@ -7,11 +7,12 @@ import { type Build, isStartView, type Player } from '../shared/manifest.ts'
 import {
   featuredProblems,
   findBuild,
+  isUpToDate,
   readManifest,
   shareBuilds,
   sortManifest,
 } from './lib/manifest.ts'
-import { DEFAULT_LIGHT } from './lib/bake-light.ts'
+import { DEFAULT_LIGHT, lightKey } from './lib/bake-light.ts'
 import { readBlockDimensions } from './lib/obj-header.ts'
 import { objToGlb } from './lib/obj-to-glb.ts'
 import { PUBLIC_DIR, ROSTER_FILE, SOURCES_DIR } from './lib/paths.ts'
@@ -25,6 +26,8 @@ const SOURCES = SOURCES_DIR
 const ROSTER = ROSTER_FILE
 const PUBLIC = PUBLIC_DIR
 const MANIFEST = join(PUBLIC, 'builds', 'manifest.json')
+// every model is baked with the default lighting; a change to it rebakes them all
+const LIGHT = lightKey()
 
 const mb = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(2)} MB`
 
@@ -36,22 +39,16 @@ async function mtimeMs(path: string): Promise<number> {
 }
 
 async function convertBuild(username: string, source: BuildSource): Promise<Build> {
-  const raw = await objToGlb(source.objPath)
-  // prototype: BAKE_LIGHT=notre-dame,colosseum (or all) bakes shader-style lighting
-  const bake = process.env.BAKE_LIGHT?.split(',') ?? []
-  const light = bake.includes('all') || bake.includes(source.slug) ? DEFAULT_LIGHT : undefined
   const started = Date.now()
-  const { glb, stats } = await optimizeGlb(raw, light)
-  if (light)
-    console.log(
-      `  ${source.slug}: lighting baked in ${((Date.now() - started) / 1000).toFixed(1)}s`,
-    )
+  const raw = await objToGlb(source.objPath)
+  const { glb, stats } = await optimizeGlb(raw, DEFAULT_LIGHT)
+  const seconds = ((Date.now() - started) / 1000).toFixed(0)
   const file = `builds/${username}/${source.slug}.glb`
 
   await mkdir(join(PUBLIC, 'builds', username), { recursive: true })
   await writeFile(join(PUBLIC, file), glb)
   console.log(
-    `  ${source.slug}: ${mb(raw.byteLength)} -> ${mb(glb.byteLength)}, ${stats.triangles} triangles`,
+    `  ${source.slug}: ${mb(raw.byteLength)} -> ${mb(glb.byteLength)}, ${stats.triangles} triangles, lit in ${seconds}s`,
   )
 
   return {
@@ -61,6 +58,7 @@ async function convertBuild(username: string, source: BuildSource): Promise<Buil
     file,
     hash: createHash('sha1').update(glb).digest('hex').slice(0, 8),
     bytes: glb.byteLength,
+    light: LIGHT,
     ...stats,
     // Mineways' own count when it gives one, the measured mesh otherwise
     size: (await readBlockDimensions(source.objPath)) ?? stats.size,
@@ -136,7 +134,7 @@ for (const source of sources) {
     // (a build shared with this player by someone else is theirs, not a previous run of this)
     const own = `builds/${source.username}/${build.slug}.glb`
     const known = findBuild(previous, source.username, build.slug)
-    if (known?.file === own && (await mtimeMs(join(PUBLIC, own))) > build.newestMtimeMs) {
+    if (isUpToDate(known, own, await mtimeMs(join(PUBLIC, own)), build.newestMtimeMs, LIGHT)) {
       // spelled out so a field removed from build.json also leaves the manifest
       const { description, builtOn, view, featured } = build.meta
       builds.push({
