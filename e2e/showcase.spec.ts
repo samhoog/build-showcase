@@ -1,4 +1,6 @@
+import { readFile } from 'node:fs/promises'
 import { expect, type Locator, type Page, test } from '@playwright/test'
+import { DEV_URL } from '../playwright.config.ts'
 
 type Counted = { webglContexts: number }
 
@@ -232,11 +234,68 @@ test('the camera readout shows the view, and a build.json view is where the came
     '"view": {"azimuth":-60,"elevation":10,"zoom":1.3}',
   )
 
+  // the built site has nowhere to save to, so it only offers Copy
+  await expect(page.getByRole('button', { name: 'Copy' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Save to build.json' })).toHaveCount(0)
+
   // C toggles it, and it is off by default
   await page.keyboard.press('c')
   await expect(page.locator('pre')).toHaveCount(0)
   await page.goto('/p/jeb_/watchtower')
   await expect(page.locator('pre')).toHaveCount(0)
+})
+
+test('under npm run dev, Save writes the current view into build.json', async ({
+  page,
+  isMobile,
+}) => {
+  // one project is enough, and two would write the same file at once
+  test.skip(isMobile, 'runs once, on desktop')
+  // greenhouse: no other test depends on where its camera starts
+  const buildJson = '.e2e/models-src/Notch/greenhouse/build.json'
+  await page.goto(`${DEV_URL}/p/Notch/greenhouse?camera`)
+  const readout = page.locator('pre', { hasText: '"view":' })
+  await expect(readout).toBeVisible({ timeout: 30_000 })
+
+  await page.getByRole('dialog').locator('canvas').focus()
+  for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('+')
+  const shown = (await readout.textContent())!.replace('"view": ', '')
+
+  await page.getByRole('button', { name: 'Save to build.json' }).click()
+  await expect(page.getByRole('status')).toContainText(`Saved to ${buildJson}`)
+
+  // the file has exactly the view that was on screen, and kept its other fields
+  const saved = JSON.parse(await readFile(buildJson, 'utf8'))
+  expect(saved.view).toEqual(JSON.parse(shown))
+  expect(saved.title).toBe('Greenhouse')
+
+  // moving again marks the saved view as out of date
+  await page.getByRole('dialog').locator('canvas').focus()
+  await page.keyboard.press('ArrowLeft')
+  await expect(page.getByRole('status')).toHaveCount(0)
+
+  // Reset view goes back to what was saved
+  await page.getByRole('button', { name: 'Reset view' }).click()
+  await expect(readout).toHaveText(`"view": ${shown}`)
+
+  // and a fresh load starts there, without running convert
+  await page.goto(`${DEV_URL}/p/Notch/greenhouse?camera`)
+  const reloaded = page.locator('pre', { hasText: '"view":' })
+  await expect(reloaded).toHaveText(`"view": ${shown}`, { timeout: 30_000 })
+
+  // Save straight after a drag, while the camera is still gliding: what is saved is where
+  // it comes to rest, so the message stays and the file matches the resting view
+  const box = (await page.getByRole('dialog').locator('canvas').boundingBox())!
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width / 2 + 300, box.y + box.height / 2, { steps: 4 })
+  await page.mouse.up()
+  await page.getByRole('button', { name: 'Save to build.json' }).click()
+  await page.waitForTimeout(1500)
+  await expect(page.getByRole('status')).toContainText('Saved to')
+  const resting = (await reloaded.textContent())!.replace('"view": ', '')
+  expect(JSON.parse(await readFile(buildJson, 'utf8')).view).toEqual(JSON.parse(resting))
 })
 
 test('touch scrolling is left to the page on cards, and taken over in the viewer', async ({
