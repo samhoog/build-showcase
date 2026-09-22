@@ -18,17 +18,24 @@ models-src/
                                            "view": { "azimuth": 80, "elevation": 24, "zoom": 1.2 } }
 ```
 
-Then run `npm run convert`. Only builds whose files changed are converted again.
+Then run `npm run convert`. Only builds whose files changed are converted again, and any build
+without a `build.json` gets an empty one (`{}`) to fill in. An existing one is never touched.
 
 ## Choosing where the camera starts
 
-Open the build full screen and press `C` (or add `?camera` to its URL). A panel shows the
-current camera as a `"view"` line that updates as you turn, zoom and pan. When it looks
-right, press Copy and paste the line into the build's `build.json`, then run
-`npm run convert`. The card and the viewer both start from it, and Reset view goes back to
-it. `azimuth` and `elevation` are degrees, `zoom` is relative to the distance at which the
-build just fits (so the view holds on phones too), and `target` only appears if you panned
-away from the centre.
+Run the site with `npm run dev`, open the build full screen and press `C` (or add `?camera`
+to its URL). A panel shows the current camera as a `"view"` line that updates as you turn,
+zoom and pan. When it looks right, press **Save to build.json**: the view is written into
+that build's `build.json` (everything else in it is kept) and takes effect straight away,
+no convert needed. The card and the viewer both start from it, and Reset view goes back to
+it. Saving works from any builder's page of a shared build.
+
+The Save button only exists under `npm run dev`; a built site has no server to write with,
+so there the panel offers Copy instead, to paste into `build.json` by hand.
+
+`azimuth` and `elevation` are degrees, `zoom` is relative to the distance at which the build
+just fits (so the view holds on phones too), and `target` only appears if you panned away
+from the centre.
 
 ## Builds with more than one builder
 

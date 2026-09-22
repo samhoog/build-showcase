@@ -18,7 +18,8 @@ reference and gotchas; read it before changing anything under `src/stage` or `sr
 ## Commands
 
 - `npm run check` lint (oxlint) + type-check + unit tests (vitest). Run before every commit.
-- `npm run test:e2e` Playwright, desktop and phone. Builds the site with sample data itself.
+- `npm run test:e2e` Playwright, desktop and phone. Builds the site with sample data itself,
+  and runs a dev server on the same sandbox for dev-only tools.
 - `npm run format` Prettier. `npm run convert` builds local content from `models-src/`.
 
 ## Style

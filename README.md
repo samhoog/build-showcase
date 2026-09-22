@@ -25,9 +25,11 @@ npm run dev
 
 1. Export it from Mineways as OBJ into `models-src/<minecraft-username>/<build-name>/`
    (settings in [models-src/README.md](models-src/README.md)).
-2. Optionally add a `build.json` with `title`, `description`, `builtOn`, and `builders` (the
-   other players who worked on it; the build then appears on all of their pages).
-3. `npm run convert`.
+2. `npm run convert`. It adds an empty `build.json` to the build's folder, where you can set
+   `title`, `description`, `builtOn`, and `builders` (the other players who worked on it; the
+   build then appears on all of their pages).
+3. To choose where the camera starts, open the build under `npm run dev`, press `C`, and use
+   **Save to build.json** (see [models-src/README.md](models-src/README.md)).
 
 ## Adding a player
 

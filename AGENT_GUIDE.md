@@ -63,34 +63,49 @@ runtime; skins are downloaded from Mojang at convert time.
 
 ### Pipeline (`scripts/`)
 
-| File                | Purpose                                                                         | Key exports                                  |
-| ------------------- | ------------------------------------------------------------------------------- | -------------------------------------------- |
-| `convert.ts`        | entry point for `npm run convert`; incremental, never fails on one bad build    | -                                            |
-| `lib/scan.ts`       | finds `models-src/<username>/<build>/*.obj`, reads `build.json` / `player.json` | `scanSources`                                |
-| `lib/slug.ts`       | username validation, folder name -> slug / title                                | `isValidUsername`, `toSlug`, `titleFromSlug` |
-| `lib/obj-to-glb.ts` | OBJ + MTL + PNG -> GLB via obj2gltf                                             | `objToGlb`                                   |
-| `lib/optimize.ts`   | alpha modes, dedup/join/weld, meshopt; reports triangles and size in blocks     | `optimizeGlb`, `GlbStats`                    |
-| `lib/skins.ts`      | username -> skin PNG from Mojang, cached a week, flat fallback                  | `ensureSkin`, `fetchSkin`                    |
-| `lib/manifest.ts`   | read previous manifest, sort players and builds                                 | `readManifest`, `sortManifest`               |
-| `sample/*`          | procedural voxel builds written in Mineways' OBJ layout                         | `VoxelGrid`, `voxelsToObj`, `drawAtlas`      |
+| File                    | Purpose                                                                                                                                                                                     | Key exports                                   |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `convert.ts`            | entry point for `npm run convert`; incremental, never fails on one bad build; adds an empty `build.json` where one is missing; removes models and skins of builds and players that are gone | -                                             |
+| `save-view-endpoint.ts` | Vite plugin, `apply: 'serve'`: `POST /__save-view` for the camera readout's Save button. Dev server only                                                                                    | `saveViewEndpoint`                            |
+| `lib/paths.ts`          | `SOURCES_DIR`, `PUBLIC_DIR`, `ROSTER_FILE`, overridable by env so e2e can sandbox itself                                                                                                    | -                                             |
+| `lib/roster.ts`         | reads `players.json`                                                                                                                                                                        | `readRoster`                                  |
+| `lib/scan.ts`           | merges the roster with `models-src/<username>/<build>/*.obj` folders, reads `build.json` / `player.json`; dates a build by its model files only                                             | `scanSources`                                 |
+| `lib/slug.ts`           | username validation, folder name -> slug / title                                                                                                                                            | `isValidUsername`, `toSlug`, `titleFromSlug`  |
+| `lib/obj-header.ts`     | a build's size in blocks, from Mineways' OBJ header (measuring the mesh is off by one)                                                                                                      | `readBlockDimensions`                         |
+| `lib/obj-to-glb.ts`     | OBJ + MTL + PNG -> GLB via obj2gltf                                                                                                                                                         | `objToGlb`                                    |
+| `lib/optimize.ts`       | alpha modes, dedup/join/weld, meshopt; reports triangles and measured size                                                                                                                  | `optimizeGlb`, `GlbStats`                     |
+| `lib/skins.ts`          | username -> skin PNG from Mojang; real skins cached a week, 429s retried, fallbacks retried every run and never written over a real skin                                                    | `ensureSkin`, `fetchSkin`                     |
+| `lib/manifest.ts`       | read the previous manifest, list shared builds under every builder, sort                                                                                                                    | `readManifest`, `shareBuilds`, `sortManifest` |
+| `lib/save-view.ts`      | writes a `view` into a build's `build.json` and the manifest; finds the folder by scanning, never from request input                                                                        | `saveView`, `SaveViewError`                   |
+| `sample/*`              | e2e fixture only: procedural voxel builds in Mineways' OBJ layout                                                                                                                           | `VoxelGrid`, `voxelsToObj`, `drawAtlas`       |
+
+### Shared (`shared/`)
+
+| File          | Purpose                                                             | Key exports                                                               |
+| ------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `manifest.ts` | manifest types for pipeline and site, view validation, view updates | `Manifest`, `Player`, `Build`, `StartView`, `isStartView`, `setBuildView` |
 
 ### Site (`src/`)
 
-| File                                       | Purpose                                                                                                         |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| `stage/Stage.ts`                           | `Stage` singleton and `Viewport`                                                                                |
-| `stage/useViewport.ts`                     | React hook that registers a canvas with the Stage                                                               |
-| `three/buildView.ts`                       | `BuildView`: lights, OrbitControls, keyboard nudge, reset. No auto-rotate: nothing moves until someone moves it |
-| `three/framing.ts`                         | `Bounds` (upright cylinder), `fitDistance`, `frameBounds`, `viewDirection` / `viewAngles` (degrees)             |
-| `three/prepareModel.ts`                    | GLTF scene -> Lambert materials with nearest-neighbour textures, bounds, dispose                                |
-| `three/buildCache.ts`, `three/lruCache.ts` | lazy GLB loading, ref-counted LRU                                                                               |
-| `three/playerFigure.ts`                    | skinview3d `PlayerObject` with idle, look-at and wave animation                                                 |
-| `pointer.ts`                               | shared mouse position and the reduced-motion query                                                              |
-| `data/manifest.ts`                         | `useManifest`, `assetUrl`, `findPlayer`, `findBuild`, `formatSize`                                              |
-| `components/PlayerLineup.tsx`              | home page lineup; each figure is a real link                                                                    |
-| `components/BuildCard.tsx`                 | live card; loads when near the viewport, releases when far                                                      |
-| `components/BuildViewer.tsx`               | fullscreen modal `<dialog>`, driven by the route                                                                |
-| `pages/ManifestGate.tsx`                   | loading / empty / error states for every page                                                                   |
+| File                                       | Purpose                                                                                                                                               |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `stage/Stage.ts`                           | `Stage` singleton and `Viewport`; rests after expensive frames                                                                                        |
+| `stage/frameDelta.ts`                      | frame deltas from rAF timestamps, and how long to rest after a frame                                                                                  |
+| `stage/useViewport.ts`                     | React hook that registers a canvas with the Stage                                                                                                     |
+| `three/buildView.ts`                       | `BuildView`: lights, OrbitControls, keyboard nudge, start view, reset, `describeView`, `settle`. No auto-rotate: nothing moves until someone moves it |
+| `three/framing.ts`                         | `Bounds` (upright cylinder), `fitDistance`, `frameBounds`, `viewDirection` / `viewAngles` (degrees)                                                   |
+| `three/prepareModel.ts`                    | GLTF scene -> Lambert materials with nearest-neighbour textures, bounds, dispose                                                                      |
+| `three/buildCache.ts`, `three/lruCache.ts` | lazy GLB loading, ref-counted LRU                                                                                                                     |
+| `three/playerFigure.ts`                    | skinview3d `PlayerObject` with idle, look-at and wave animation                                                                                       |
+| `pointer.ts`                               | shared mouse position and the reduced-motion query                                                                                                    |
+| `data/manifest.ts`                         | `useManifest`, `assetUrl`, `findPlayer`, `findBuild`, `coBuilders`, `countBuilds`, `formatSize`                                                       |
+| `data/saveView.ts`                         | posts a view to the dev server's `/__save-view`; callers check `import.meta.env.DEV`                                                                  |
+| `components/PlayerLineup.tsx`              | home page lineup; each figure is a real link                                                                                                          |
+| `components/Nametag.tsx`                   | in-game style username; shrinks to fit, never truncates                                                                                               |
+| `components/BuildCard.tsx`                 | live card with the Open badge; loads when near the viewport, releases when far                                                                        |
+| `components/BuildViewer.tsx`               | fullscreen modal `<dialog>`, driven by the route; camera readout (`C` / `?camera`) with Copy, and Save under `npm run dev`                            |
+| `components/BuiltWith.tsx`                 | "Built with …" credit line for shared builds                                                                                                          |
+| `pages/ManifestGate.tsx`                   | loading / empty / error states for every page                                                                                                         |
 
 ## Data Model
 
@@ -149,7 +164,14 @@ summing players' lists, and treat every builder the same: there is no visible "o
   every eased animation ran away (figures spinning wildly after a page change).
 - A build's starting camera is `StartView` (angles + zoom relative to the fitted distance,
   never raw coordinates, so it holds across aspect ratios). `BuildView.describeView()` is
-  the inverse of `resetView()`; the viewer's `C` / `?camera` readout prints it.
+  the inverse of `resetView()`; the viewer's `C` / `?camera` readout prints it, and under
+  `npm run dev` its Save button writes it through `/__save-view`. Anything that writes to
+  disk must stay dev-only: `apply: 'serve'` on the server side and `import.meta.env.DEV`
+  around the UI, so it is compiled out of the built site (the e2e suite checks the built
+  site has no Save button). `isStartView` (shared/manifest.ts) validates every view, from
+  a request or from a hand-edited build.json.
+- Saving calls `BuildView.settle()` first: after a drag the camera is still gliding
+  (damping), and the view to save is where it comes to rest.
 - Usernames are identity: never truncate one. `Nametag` shrinks long names to fit instead.
 - Never resize or lossy-compress textures in the pipeline: it is pixel art.
 - Writing colours into a `Uint8Array` wraps above 255; clamp first (bit the sample atlas).
