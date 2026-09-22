@@ -22,6 +22,9 @@ models-src/
 Then run `npm run convert`. Only builds whose files changed are converted again, and any build
 without a `build.json` gets an empty one (`{}`) to fill in. An existing one is never touched.
 
+Convert also bakes shader-style lighting into every model (see "Lighting" below), which is
+the slow part: roughly 20 seconds per million triangles, once per export.
+
 ## Order on a player's page
 
 A build with `"featured": true` comes first and gets the full-width slot. The rest follow
@@ -89,14 +92,30 @@ merges flat runs of faces and can cut the triangle count several times over, at 
 one draw call per block type. It should convert, but it is untested here; try it if a big
 build turns out too heavy.
 
+## Lighting
+
+Every model gets lighting baked in when it is converted: for each block corner, how much
+direct sun reaches it (so builds cast shadows on themselves) and how open it is to the sky
+(so corners, recesses and overhangs darken). The site then shades with a warm late-afternoon
+sun and a cool sky, through a filmic tone curve, at no extra cost when viewing. Light blocks
+(glowstone, lanterns, torches and the like) stay bright in shadow.
+
+The sun is the same for every build: from the right of the default camera, 32° up. It is
+set in `DEFAULT_LIGHT` in `scripts/lib/bake-light.ts`; changing it rebakes every build on
+the next convert. Colours and brightness are in `src/three/bakedLightMaterial.ts` and need
+no rebake. Shadows are soft, about a block wide, because the light is stored per block
+corner.
+
 ## What is verified
 
 Real Mineways 13.01 exports with the settings above convert and render correctly, the
-largest so far being 2.4 million triangles (a 190 MB intermediate, a 28 MB GLB, a few
-seconds to convert, 5 draw calls). Cutout leaves, stained glass and the block-size readout
+largest so far being 2.4 million triangles (a 190 MB intermediate, a 33 MB GLB with its
+lighting, under a minute to convert, 5 draw calls). Cutout leaves, stained glass and the block-size readout
 all match. Not yet checked on a real phone: the site rests between expensive frames so a
 slow device stays scrollable, but how smooth the largest builds feel there is unknown.
 
 If something does look wrong, the two places to look are `TRANSLUCENT` in
 `scripts/lib/optimize.ts` (which materials blend rather than cut out) and `toBlockMaterial`
-in `src/three/prepareModel.ts` (texture filtering).
+in `src/three/prepareModel.ts` (texture filtering). For lighting that looks wrong on one
+build, `scripts/lib/bake-light.ts` decides what casts shadow (everything but glass and
+water) and `src/three/bakedLightMaterial.ts` which blocks glow.
