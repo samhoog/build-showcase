@@ -11,14 +11,13 @@ import styles from './BuildCard.module.css'
 type Status = 'waiting' | 'loading' | 'ready' | 'error'
 type Props = { player: Player; build: Build; coBuilders: Player[]; featured?: boolean }
 
-// A build as a live 3D card. Mouse users can drag it round in place; a click or tap (or
-// Enter on the title) opens it full screen. Nothing moves until someone moves it, so the
-// "Open" badge is what says the picture is interactive.
+// A build as a 3D card: a still picture from its starting view. A click or tap (or Enter
+// on the title) opens it full screen, where it can be turned and zoomed; the "Open" badge
+// is what says so.
 export function BuildCard({ player, build, coBuilders, featured = false }: Props) {
   const cardRef = useRef<HTMLElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const viewRef = useRef<BuildView | null>(null)
-  const pressedAt = useRef({ x: 0, y: 0 })
   const [near, setNear] = useState(false)
   const [status, setStatus] = useState<Status>('waiting')
   const [attempt, setAttempt] = useState(0)
@@ -31,7 +30,7 @@ export function BuildCard({ player, build, coBuilders, featured = false }: Props
     canvasRef,
     1.5,
     (viewport: Viewport) => {
-      const view = new BuildView(viewport, { fullControls: false, allowTouch: false })
+      const view = new BuildView(viewport, { interactive: false })
       viewRef.current = view
       return () => {
         view.dispose()
@@ -76,15 +75,6 @@ export function BuildCard({ player, build, coBuilders, featured = false }: Props
     }
   }, [near, url, attempt, build.view])
 
-  // a press that turned into a drag was an orbit, not a request to open the build
-  const openIfClick = (event: React.MouseEvent) => {
-    const moved = Math.hypot(
-      event.clientX - pressedAt.current.x,
-      event.clientY - pressedAt.current.y,
-    )
-    if (moved < 6) navigate(viewerPath, { state: { fromCard: true } })
-  }
-
   return (
     <article ref={cardRef} className={`${styles.card} ${featured ? styles.featured : ''}`}>
       <div className={styles.view}>
@@ -93,8 +83,7 @@ export function BuildCard({ player, build, coBuilders, featured = false }: Props
             ref={canvasRef}
             className={styles.canvas}
             aria-hidden="true"
-            onPointerDown={(e) => (pressedAt.current = { x: e.clientX, y: e.clientY })}
-            onClick={openIfClick}
+            onClick={() => navigate(viewerPath, { state: { fromCard: true } })}
           />
         ) : (
           <p className={styles.note}>This browser can't show 3D (WebGL is off).</p>

@@ -7,10 +7,10 @@ import { addDaylight } from './lighting.ts'
 import type { PreparedModel } from './prepareModel.ts'
 
 export type BuildViewOptions = {
-  // cards orbit only; the fullscreen viewer can also zoom and pan
-  fullControls: boolean
-  // cards ignore touch so a finger on a card scrolls the page
-  allowTouch: boolean
+  // The fullscreen viewer turns, zooms and pans by mouse, touch and keys. A card is a still
+  // picture with no controls on the page at all: big builds are slow to redraw, and a card
+  // that turns under a passing mouse or finger feels laggy. Clicking one opens the viewer.
+  interactive: boolean
 }
 
 // Scene, camera and orbit controls for one build, shared by the card and the fullscreen viewer.
@@ -21,33 +21,26 @@ export class BuildView {
   private bounds: Bounds = { center: new Vector3(), radius: 1, halfHeight: 1 }
   private start: StartView | undefined
   private dragging = false
-  private allowTouch: boolean
 
-  // touch only drives the controls where the view owns the screen
-  private gate = (event: PointerEvent) => {
-    this.controls.enabled = this.allowTouch || event.pointerType !== 'touch'
-  }
-
-  constructor(viewport: Viewport, options: BuildViewOptions) {
+  constructor(viewport: Viewport, { interactive }: BuildViewOptions) {
     this.viewport = viewport
     const canvas = viewport.canvas
     addDaylight(viewport.scene)
 
-    // registered before OrbitControls adds its own listener, so it decides first
-    this.allowTouch = options.allowTouch
-    canvas.addEventListener('pointerdown', this.gate)
-
-    this.controls = new OrbitControls(viewport.camera, canvas)
+    // a card's camera is still placed through the controls, they are just never attached
+    // to the page, so there is nothing to drag and touch scrolls the page as normal
+    this.controls = new OrbitControls(viewport.camera, interactive ? canvas : null)
     this.controls.enableDamping = true
-    this.controls.enableZoom = options.fullControls
-    this.controls.enablePan = options.fullControls
     this.controls.maxPolarAngle = Math.PI * 0.55
-    // OrbitControls claims every touch gesture; give vertical scrolling back on cards
-    if (!options.allowTouch) canvas.style.touchAction = 'pan-y'
-    // it also leaves an inline `cursor: auto` behind, which would beat the stylesheet's
-    // pointer (cards) and grab (viewer) hands
-    canvas.style.cursor = ''
+    this.controls.addEventListener('change', () => viewport.invalidate())
+    if (!interactive) {
+      viewport.onResize = () => this.reframe()
+      viewport.onFrame = (dt) => this.update(dt)
+      return
+    }
 
+    // OrbitControls leaves an inline `cursor: auto` behind, which would beat the grab hand
+    canvas.style.cursor = ''
     this.controls.addEventListener('start', () => {
       this.dragging = true
       canvas.style.cursor = 'grabbing'
@@ -58,7 +51,6 @@ export class BuildView {
       // damping eases the camera to a stop over the next few frames
       viewport.invalidate()
     })
-    this.controls.addEventListener('change', () => viewport.invalidate())
 
     viewport.onResize = () => this.reframe()
     viewport.onFrame = (dt) => this.update(dt)
@@ -151,8 +143,8 @@ export class BuildView {
 
   dispose() {
     this.clear()
-    this.viewport.canvas.removeEventListener('pointerdown', this.gate)
-    this.controls.dispose()
+    // only attached controls have listeners to remove; dispose() assumes an element
+    if (this.controls.domElement) this.controls.dispose()
   }
 
   // keep the current viewing angle, refit the distance to the new shape of the canvas

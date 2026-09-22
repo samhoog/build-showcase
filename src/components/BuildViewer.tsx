@@ -63,7 +63,7 @@ export function BuildViewer({ player, build, coBuilders, onClose, onViewSaved }:
     canvasRef,
     2,
     (viewport) => {
-      const view = new BuildView(viewport, { fullControls: true, allowTouch: true })
+      const view = new BuildView(viewport, { interactive: true })
       viewRef.current = view
       view.controls.addEventListener('start', () => setTouched(true))
       view.controls.addEventListener('change', () => {
