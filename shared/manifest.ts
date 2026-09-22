@@ -45,3 +45,33 @@ export type Manifest = {
   generatedAt: string
   players: Player[]
 }
+
+const isFiniteNumber = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value)
+
+// build.json is edited by hand; a bad view must be caught before it reaches a camera
+export function isStartView(value: unknown): value is StartView {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false
+  const { azimuth, elevation, zoom, target, ...rest } = value as Record<string, unknown>
+  if (Object.keys(rest).length > 0) return false
+  if (!isFiniteNumber(azimuth) || !isFiniteNumber(elevation)) return false
+  if (elevation < -90 || elevation > 90) return false
+  if (zoom !== undefined && !(isFiniteNumber(zoom) && zoom > 0)) return false
+  if (target === undefined) return true
+  return Array.isArray(target) && target.length === 3 && target.every(isFiniteNumber)
+}
+
+// Sets the view on every entry for `file`: a shared build has one per builder. Returns how
+// many entries changed.
+export function setBuildView(manifest: Manifest, file: string, view: StartView): number {
+  let changed = 0
+  for (const player of manifest.players) {
+    for (const build of player.builds) {
+      if (build.file === file) {
+        build.view = view
+        changed++
+      }
+    }
+  }
+  return changed
+}
