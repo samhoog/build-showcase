@@ -68,15 +68,25 @@ test('home page lines up every player as a link with a 3D figure', async ({ page
   await expectNoSidewaysScroll(page)
 })
 
-test('player page shows each build as a live card', async ({ page }) => {
+test('player page shows each build as a live card, the featured one first and widest', async ({
+  page,
+  isMobile,
+}) => {
   await page.goto('/')
   await page.getByRole('link', { name: /jeb_/ }).click()
   await expect(page).toHaveURL(/\/p\/jeb_$/)
 
+  // the watchtower is jeb_'s oldest build, but its build.json says "featured": true
   const cards = page.getByRole('article')
   await expect(cards).toHaveCount(3)
-  await expect(cards.first().getByRole('heading')).toHaveText('Stone bridge')
-  await expect(cards.first()).toContainText('29 × 11 × 11 blocks')
+  await expect(cards.first().getByRole('heading')).toHaveText('Watchtower')
+  await expect(cards.first()).toContainText('19 × 29 × 19 blocks')
+  // then newest first
+  await expect(cards.nth(1).getByRole('heading')).toHaveText('Stone bridge')
+  if (!isMobile) {
+    const [first, second] = [await cards.nth(0).boundingBox(), await cards.nth(1).boundingBox()]
+    expect(first!.width).toBeGreaterThan(second!.width * 1.8)
+  }
   await expectDrawn(cards.first().locator('canvas'))
   await expectNoSidewaysScroll(page)
 
@@ -144,8 +154,8 @@ test('a card opens the fullscreen viewer, and Escape or Back closes it', async (
   await expect(canvas).toHaveCSS('cursor', 'pointer')
   await open(canvas, isMobile)
 
-  await expect(page).toHaveURL(/\/p\/jeb_\/stone-bridge$/)
-  const viewer = page.getByRole('dialog', { name: 'Stone bridge' })
+  await expect(page).toHaveURL(/\/p\/jeb_\/watchtower$/)
+  const viewer = page.getByRole('dialog', { name: 'Watchtower' })
   await expect(viewer).toBeVisible()
   await expect(viewer.getByRole('button', { name: 'Close' })).toBeFocused()
   await expectDrawn(viewer.locator('canvas'))
@@ -156,8 +166,8 @@ test('a card opens the fullscreen viewer, and Escape or Back closes it', async (
   await expect(page).toHaveURL(/\/p\/jeb_$/)
 
   // and the browser's Back button closes it too
-  await page.getByRole('link', { name: 'Watchtower' }).click()
-  await expect(page.getByRole('dialog', { name: 'Watchtower' })).toBeVisible()
+  await page.getByRole('link', { name: 'Stone bridge' }).click()
+  await expect(page.getByRole('dialog', { name: 'Stone bridge' })).toBeVisible()
   await page.goBack()
   await expect(page.getByRole('dialog')).toBeHidden()
 })

@@ -12,6 +12,8 @@ export type SampleBuild = {
   builders?: string[]
   // custom starting camera, to exercise build.json views
   view?: StartView
+  // to exercise the featured flag: the oldest of jeb_'s builds, so it must beat the date order
+  featured?: boolean
   build: () => VoxelGrid
 }
 
@@ -204,6 +206,7 @@ export const SAMPLE_BUILDS: SampleBuild[] = [
     description: 'Twenty-eight blocks of stone with a beacon on top.',
     builtOn: '2026-05-20',
     view: { azimuth: -60, elevation: 10, zoom: 1.3 },
+    featured: true,
     build: watchtower,
   },
   {

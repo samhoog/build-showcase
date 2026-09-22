@@ -30,7 +30,7 @@ for (const sample of SAMPLE_BUILDS) {
 
   const name = sample.folder
   const { obj, mtl, faceCount } = voxelsToObj(sample.build(), name)
-  const { title, description, builtOn, builders, view } = sample
+  const { title, description, builtOn, builders, view, featured } = sample
 
   await mkdir(dir, { recursive: true })
   await Promise.all([
@@ -42,7 +42,7 @@ for (const sample of SAMPLE_BUILDS) {
     writeFile(join(dir, `${name}-Alpha.png`), atlas.alpha),
     writeFile(
       join(dir, 'build.json'),
-      JSON.stringify({ title, description, builtOn, builders, view }, null, 2),
+      JSON.stringify({ title, description, builtOn, builders, view, featured }, null, 2),
     ),
   ])
   console.log(`wrote ${dir} (${faceCount} faces)`)
