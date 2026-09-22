@@ -97,6 +97,19 @@ export class BuildView {
     this.viewport.invalidate()
   }
 
+  // Finishes any glide left over from a drag at once, landing where it would have come to
+  // rest: with damping off, one update applies all the movement still owed
+  settle() {
+    this.controls.enableDamping = false
+    this.controls.update()
+    this.controls.enableDamping = true
+  }
+
+  // Makes `view` the one Reset view returns to, without moving the camera
+  setStart(view: StartView) {
+    this.start = view
+  }
+
   // The current camera as a StartView, for pasting into build.json. Target is left out
   // when it is still the centre of the build.
   describeView(): StartView {
