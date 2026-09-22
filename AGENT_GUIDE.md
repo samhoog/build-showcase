@@ -102,7 +102,7 @@ runtime; skins are downloaded from Mojang at convert time.
 | `data/saveView.ts`                         | posts a view to the dev server's `/__save-view`; callers check `import.meta.env.DEV`                                                                  |
 | `components/PlayerLineup.tsx`              | home page lineup; each figure is a real link                                                                                                          |
 | `components/Nametag.tsx`                   | in-game style username; shrinks to fit, never truncates                                                                                               |
-| `components/BuildCard.tsx`                 | live card with the Open badge; loads when near the viewport, releases when far                                                                        |
+| `components/BuildCard.tsx`                 | still 3D picture with the Open badge (no controls: clicking opens the viewer); loads when near the viewport, releases when far                        |
 | `components/BuildViewer.tsx`               | fullscreen modal `<dialog>`, driven by the route; camera readout (`C` / `?camera`) with Copy, and Save under `npm run dev`                            |
 | `components/BuiltWith.tsx`                 | "Built with …" credit line for shared builds                                                                                                          |
 | `pages/ManifestGate.tsx`                   | loading / empty / error states for every page                                                                                                         |
@@ -137,8 +137,11 @@ gives `index === 0` the full-width slot, so ordering lives in `sortManifest`, no
 - **Adding a 3D view:** controller class in `src/three/`, component that calls
   `useViewport`, CSS sets the canvas size. Decorative canvases get `aria-hidden`; the text
   around them carries the meaning.
-- **Touch:** inline views must not steal scrolling (`touch-action: pan-y`, controls ignore
-  touch). Only the fullscreen viewer takes over touch.
+- **Cards are still pictures.** Only the fullscreen viewer is interactive
+  (`BuildView({ interactive: true })`). Card views get OrbitControls that are never attached
+  to the page: they place the camera but have no listeners, so a mouse or finger passing
+  over a card never redraws a heavy build, and touch scrolls the page untouched. Don't add
+  input to cards; big builds made that laggy.
 - **Motion:** builds never move on their own (a slow automatic turn reads as lag on big
   builds); the "Open" badge on a card is what signals interactivity. Player figures idle,
   and `reducedMotion.matches` must stop that.
@@ -156,8 +159,9 @@ gives `index === 0` the full-width slot, so ordering lives in `sortManifest`, no
 - `skinview3d` pins `three@^0.156`. `package.json` `overrides` forces it (and `@types/three`)
   onto our version. We only use its `PlayerObject`; never use its `SkinViewer` (own context).
 - `PlayerObject` stands with feet at y = -16 and head top at y = 16, in skin pixels.
-- `OrbitControls` sets `touch-action: none` on its element; `BuildView` puts `pan-y` back
-  for cards, and gates touch with a `pointerdown` listener registered before the controls.
+- Attached `OrbitControls` set `touch-action: none` and an inline `cursor` on their
+  element; that is fine for the fullscreen viewer, which owns the screen, and why cards
+  never attach theirs. `dispose()` assumes an element, so only attached controls call it.
 - The Stage rests after expensive frames (`restUntil()`): real builds run to millions of
   triangles, and drawing must never starve scrolling or taps. Animation still advances every
   frame; only drawing is skipped. Don't add render loops that bypass it.
