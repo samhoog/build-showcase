@@ -62,6 +62,11 @@ const fragmentShader = /* glsl */ `
   void main() {
     vec4 albedo = vec4(diffuse, opacity) * texture2D(map, vUv);
     if (albedo.a < cutoff) discard;
+    // what survives the cutout is solid, as in three's own materials: otherwise leaf and
+    // glass edges come out part see-through on the transparent canvas
+    #ifdef OPAQUE
+      albedo.a = 1.0;
+    #endif
     vec3 light = sunColor * vLight.x + skyColor * vLight.y;
     light = max(light, vec3(glow));
     vec3 color = filmic(albedo.rgb * light * exposure);
