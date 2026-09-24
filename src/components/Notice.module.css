@@ -1,0 +1,31 @@
+.notice {
+  max-width: 38rem;
+  padding-block: var(--space-5);
+}
+
+.title {
+  font-size: var(--text-xl);
+}
+
+.body {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.body code {
+  padding: 0.1em 0.35em;
+  background: rgb(21 18 30 / 0.08);
+  font-size: 0.9em;
+}
+
+.body a,
+.body button {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--lapis);
+  text-decoration: underline;
+  cursor: pointer;
+}

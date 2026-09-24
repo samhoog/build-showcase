@@ -1,0 +1,56 @@
+.back {
+  font-size: var(--text-sm);
+}
+
+.back::before {
+  content: '‹ ';
+}
+
+.intro {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+  margin: var(--space-3) 0 var(--space-5);
+  /* the same strip of ground the lineup stands on */
+  padding-bottom: 0.5rem;
+  background: linear-gradient(var(--grass) 37.5%, var(--dirt) 37.5%) bottom / 100% 0.5rem no-repeat;
+}
+
+.figure {
+  flex: none;
+  width: 6rem;
+}
+
+.name {
+  margin-bottom: var(--space-1);
+  --nametag-size: var(--text-xl);
+  /* a nametag, not a headline: drop the wide heading cut */
+  font-stretch: 100%;
+  font-weight: 400;
+  font-size: var(--text-xl);
+  letter-spacing: 0;
+}
+
+.intro > div {
+  padding-bottom: var(--space-3);
+}
+
+/* feet on the grass */
+.figure {
+  margin-bottom: 0;
+}
+
+.missing {
+  margin-bottom: var(--space-4);
+}
+
+.builds {
+  display: grid;
+  gap: var(--space-5) var(--space-4);
+}
+
+@media (min-width: 44rem) {
+  .builds {
+    grid-template-columns: 1fr 1fr;
+  }
+}

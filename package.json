@@ -1,0 +1,55 @@
+{
+  "name": "build-showcase",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "oxlint",
+    "typecheck": "tsc -b",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "check": "npm run lint && npm run typecheck && npm run test",
+    "convert": "node scripts/convert.ts",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource/pixelify-sans": "^5.3.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router-dom": "^7.18.4",
+    "skinview3d": "^3.4.2",
+    "three": "^0.186.0"
+  },
+  "devDependencies": {
+    "@gltf-transform/core": "^4.5.0",
+    "@gltf-transform/extensions": "^4.5.0",
+    "@gltf-transform/functions": "^4.5.0",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.2",
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.186.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "meshoptimizer": "^1.2.0",
+    "obj2gltf": "^3.2.0",
+    "oxlint": "^1.85.0",
+    "pngjs": "^7.0.0",
+    "prettier": "^3.9.8",
+    "three-mesh-bvh": "^0.9.15",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
+  },
+  "overrides": {
+    "three": "$three",
+    "@types/three": "$@types/three"
+  }
+}
