@@ -21,6 +21,7 @@ reference and gotchas; read it before changing anything under `src/stage` or `sr
 - `npm run test:e2e` Playwright, desktop and phone. Builds the site with sample data itself,
   and runs a dev server on the same sandbox for dev-only tools.
 - `npm run format` Prettier. `npm run convert` builds local content from `models-src/`.
+- `npm run deploy` builds for GitHub Pages and force-pushes `dist/` to `gh-pages`.
 
 ## Style
 

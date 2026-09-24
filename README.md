@@ -53,8 +53,22 @@ also counts as a player, but only `players.json` is committed.)
 
 ## Deploying
 
-Not set up yet. Because the models are gitignored, the site has to be built on a machine
-that has them: run `npm run convert && npm run build`, then upload `dist/` to any static
-host. Set `BASE_PATH=/sub/path/` when building if it won't live at the domain root.
+The site is published to GitHub Pages at
+[samhoog.github.io/build-showcase](https://samhoog.github.io/build-showcase/).
+
+```sh
+npm run convert   # if any build changed
+npm run deploy
+```
+
+`npm run deploy` builds the site for its address (`/build-showcase/`) and force-pushes the
+result to the `gh-pages` branch, which Pages serves. It has to run here rather than in CI,
+because the models are gitignored and only this machine has them. Everything published is
+public, models included.
+
+The deploy is a single parentless commit each time, so `main` never carries model files. The
+published site is about 270 MB; a full rebake of every build pushes that much again, so if
+the repo grows uncomfortably large, delete the `gh-pages` branch and deploy again to start
+it over.
 
 See [AGENT_GUIDE.md](AGENT_GUIDE.md) for how the code is organised.
