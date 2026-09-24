@@ -66,6 +66,7 @@ runtime; skins are downloaded from Mojang at convert time.
 | File                                                              | Purpose                                                                                                                                                                                     | Key exports                                                       |
 | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | `convert.ts`                                                      | entry point for `npm run convert`; incremental, never fails on one bad build; adds an empty `build.json` where one is missing; removes models and skins of builds and players that are gone | -                                                                 |
+| `deploy.ts`                                                       | builds for GitHub Pages and publishes `dist/` to `gh-pages` as one parentless commit (no worktree: a scratch index, `write-tree`, `commit-tree`, force push)                                | -                                                                 |
 | `save-view-endpoint.ts`                                           | Vite plugin, `apply: 'serve'`: `POST /__save-view` for the camera readout's Save button. Dev server only                                                                                    | `saveViewEndpoint`                                                |
 | `lib/paths.ts`                                                    | `SOURCES_DIR`, `PUBLIC_DIR`, `ROSTER_FILE`, overridable by env so e2e can sandbox itself                                                                                                    | -                                                                 |
 | `lib/roster.ts`                                                   | reads `players.json`                                                                                                                                                                        | `readRoster`                                                      |
@@ -193,6 +194,10 @@ gives `index === 0` the full-width slot, so ordering lives in `sortManifest`, no
   key differs. Change the sun or the bake in `bake-light.ts` (bump `BAKE_VERSION` for an
   algorithm change) and the next convert rebakes everything. GLTFLoader lower-cases the
   attribute to `_light`.
+- The site is served from a sub-path (`/build-showcase/`), so nothing may hard-code a
+  leading-slash URL: asset paths go through `assetUrl()` and the router takes its basename
+  from `import.meta.env.BASE_URL`. `BASE_PATH` at build time sets both. Deep links work
+  because the build copies `index.html` to `404.html`, which Pages serves for unknown paths.
 - `gh` installed as a snap cannot read `/tmp`; pipe bodies in on stdin (`--body-file -`).
 - vitest only includes `src/` and `scripts/`; `e2e/*.spec.ts` belongs to Playwright.
 
