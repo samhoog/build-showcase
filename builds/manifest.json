@@ -1,0 +1,927 @@
+{
+  "generatedAt": "2026-09-22T04:49:23.269Z",
+  "players": [
+    {
+      "username": "Dsny",
+      "displayName": "Dsny",
+      "skin": "skins/Dsny.png",
+      "slim": true,
+      "builds": [
+        {
+          "slug": "notre-dame",
+          "title": "Notre Dame",
+          "view": {
+            "azimuth": 39,
+            "elevation": 15,
+            "zoom": 1.24,
+            "target": [
+              -6,
+              41.4,
+              29.7
+            ]
+          },
+          "featured": true,
+          "builders": [
+            "Dsny"
+          ],
+          "file": "builds/Dsny/notre-dame.glb",
+          "hash": "67cd175d",
+          "bytes": 34659804,
+          "light": "46fa8428",
+          "triangles": 2423600,
+          "size": [
+            173,
+            169,
+            296
+          ]
+        },
+        {
+          "slug": "barad-dur",
+          "title": "Barad-dûr",
+          "view": {
+            "azimuth": 78,
+            "elevation": 20,
+            "zoom": 1,
+            "target": [
+              0.9,
+              90.3,
+              -5.7
+            ]
+          },
+          "builders": [
+            "Dsny"
+          ],
+          "file": "builds/Dsny/barad-dur.glb",
+          "hash": "cc9c951c",
+          "bytes": 6048156,
+          "light": "46fa8428",
+          "triangles": 321924,
+          "size": [
+            98,
+            199,
+            92
+          ]
+        },
+        {
+          "slug": "castle",
+          "view": {
+            "azimuth": 49,
+            "elevation": 20,
+            "zoom": 1.02,
+            "target": [
+              -1,
+              22.2,
+              4.8
+            ]
+          },
+          "title": "Castle",
+          "builders": [
+            "Dsny"
+          ],
+          "file": "builds/Dsny/castle.glb",
+          "hash": "eb1b1e61",
+          "bytes": 5197824,
+          "light": "46fa8428",
+          "triangles": 240640,
+          "size": [
+            78,
+            61,
+            101
+          ]
+        },
+        {
+          "slug": "christ-the-redeemer",
+          "view": {
+            "azimuth": -55,
+            "elevation": 10,
+            "zoom": 1.12,
+            "target": [
+              1.5,
+              115.1,
+              6.7
+            ]
+          },
+          "title": "Christ the Redeemer",
+          "builders": [
+            "Dsny"
+          ],
+          "file": "builds/Dsny/christ-the-redeemer.glb",
+          "hash": "774cfb24",
+          "bytes": 5030116,
+          "light": "46fa8428",
+          "triangles": 247584,
+          "size": [
+            44,
+            232,
+            190
+          ]
+        },
+        {
+          "slug": "colosseum",
+          "title": "Colosseum",
+          "builders": [
+            "Dsny",
+            "TheRealJard"
+          ],
+          "view": {
+            "azimuth": 57,
+            "elevation": 20,
+            "zoom": 1.01,
+            "target": [
+              4.9,
+              18.4,
+              0.7
+            ]
+          },
+          "file": "builds/Dsny/colosseum.glb",
+          "hash": "5bc5fa7c",
+          "bytes": 21285412,
+          "light": "46fa8428",
+          "triangles": 1431872,
+          "size": [
+            194,
+            61,
+            160
+          ]
+        },
+        {
+          "slug": "colossus",
+          "title": "Colossus",
+          "view": {
+            "azimuth": 69,
+            "elevation": -1,
+            "zoom": 0.99,
+            "target": [
+              -0.1,
+              125.6,
+              0.8
+            ]
+          },
+          "builders": [
+            "Dsny"
+          ],
+          "file": "builds/Dsny/colossus.glb",
+          "hash": "2d39529a",
+          "bytes": 3325172,
+          "light": "46fa8428",
+          "triangles": 224756,
+          "size": [
+            42,
+            256,
+            105
+          ]
+        },
+        {
+          "slug": "flying-dutchman",
+          "view": {
+            "azimuth": 34,
+            "elevation": -2,
+            "zoom": 1.13,
+            "target": [
+              3.1,
+              83.7,
+              -1.9
+            ]
+          },
+          "title": "Flying Dutchman",
+          "builders": [
+            "Dsny"
+          ],
+          "file": "builds/Dsny/flying-dutchman.glb",
+          "hash": "93e7a506",
+          "bytes": 11163448,
+          "light": "46fa8428",
+          "triangles": 689262,
+          "size": [
+            207,
+            189,
+            69
+          ]
+        },
+        {
+          "slug": "japanese-castle",
+          "builders": [
+            "Dsny",
+            "_CosmicNomad_"
+          ],
+          "view": {
+            "azimuth": 141,
+            "elevation": 13,
+            "zoom": 1.25,
+            "target": [
+              -1.5,
+              48,
+              -7.7
+            ]
+          },
+          "title": "Japanese Castle",
+          "file": "builds/Dsny/japanese-castle.glb",
+          "hash": "1f3bc06b",
+          "bytes": 21948748,
+          "light": "46fa8428",
+          "triangles": 1410282,
+          "size": [
+            155,
+            142,
+            153
+          ]
+        },
+        {
+          "slug": "mountain-range",
+          "title": "Mountain Range",
+          "view": {
+            "azimuth": 75,
+            "elevation": 13,
+            "zoom": 1.15,
+            "target": [
+              3.9,
+              75.6,
+              4.3
+            ]
+          },
+          "builders": [
+            "Dsny"
+          ],
+          "file": "builds/Dsny/mountain-range.glb",
+          "hash": "a28f5cfa",
+          "bytes": 26227420,
+          "light": "46fa8428",
+          "triangles": 1978022,
+          "size": [
+            206,
+            192,
+            390
+          ]
+        },
+        {
+          "slug": "opera-theatre",
+          "view": {
+            "azimuth": -1,
+            "elevation": -9,
+            "zoom": 1.27,
+            "target": [
+              0.1,
+              46.3,
+              -0.4
+            ]
+          },
+          "title": "Opera Theatre",
+          "builders": [
+            "Dsny"
+          ],
+          "file": "builds/Dsny/opera-theatre.glb",
+          "hash": "2b1833d8",
+          "bytes": 19767748,
+          "light": "46fa8428",
+          "triangles": 1260124,
+          "size": [
+            116,
+            99,
+            168
+          ]
+        },
+        {
+          "slug": "pirate-ship-and-skeleton-dragon",
+          "view": {
+            "azimuth": -43,
+            "elevation": 11,
+            "zoom": 1.34,
+            "target": [
+              -53.3,
+              98.5,
+              49.8
+            ]
+          },
+          "title": "Pirate Ship and Skeleton Dragon",
+          "builders": [
+            "Dsny"
+          ],
+          "file": "builds/Dsny/pirate-ship-and-skeleton-dragon.glb",
+          "hash": "7825e0fc",
+          "bytes": 4603432,
+          "light": "46fa8428",
+          "triangles": 206204,
+          "size": [
+            107,
+            193,
+            92
+          ]
+        },
+        {
+          "slug": "sanctum",
+          "view": {
+            "azimuth": 41,
+            "elevation": 7,
+            "zoom": 1.15,
+            "target": [
+              2.2,
+              72.8,
+              -2
+            ]
+          },
+          "title": "Sanctum",
+          "builders": [
+            "Dsny"
+          ],
+          "file": "builds/Dsny/sanctum.glb",
+          "hash": "33a7e2de",
+          "bytes": 16987628,
+          "light": "46fa8428",
+          "triangles": 1063408,
+          "size": [
+            91,
+            178,
+            83
+          ]
+        },
+        {
+          "slug": "star-destroyer",
+          "view": {
+            "azimuth": -52,
+            "elevation": 15,
+            "zoom": 1.37
+          },
+          "title": "Star Destroyer",
+          "builders": [
+            "Dsny"
+          ],
+          "file": "builds/Dsny/star-destroyer.glb",
+          "hash": "2aa05648",
+          "bytes": 5515300,
+          "light": "46fa8428",
+          "triangles": 264532,
+          "size": [
+            161,
+            51,
+            106
+          ]
+        },
+        {
+          "slug": "tallneck",
+          "view": {
+            "azimuth": 26,
+            "elevation": 19,
+            "zoom": 1.01,
+            "target": [
+              5,
+              110.1,
+              0.6
+            ]
+          },
+          "title": "Tallneck",
+          "builders": [
+            "Dsny"
+          ],
+          "file": "builds/Dsny/tallneck.glb",
+          "hash": "4b480b26",
+          "bytes": 6285892,
+          "light": "46fa8428",
+          "triangles": 336428,
+          "size": [
+            81,
+            229,
+            111
+          ]
+        },
+        {
+          "slug": "wayne-manor",
+          "title": "Wayne Manor",
+          "view": {
+            "azimuth": 13,
+            "elevation": 7,
+            "zoom": 0.89,
+            "target": [
+              0.2,
+              51.2,
+              -0.3
+            ]
+          },
+          "builders": [
+            "Dsny"
+          ],
+          "file": "builds/Dsny/wayne-manor.glb",
+          "hash": "a44461ab",
+          "bytes": 32993508,
+          "light": "46fa8428",
+          "triangles": 2248644,
+          "size": [
+            153,
+            110,
+            141
+          ]
+        }
+      ]
+    },
+    {
+      "username": "_CosmicNomad_",
+      "displayName": "_CosmicNomad_",
+      "skin": "skins/_CosmicNomad_.png",
+      "slim": false,
+      "builds": [
+        {
+          "slug": "flying-base",
+          "view": {
+            "azimuth": 123,
+            "elevation": 10,
+            "zoom": 1.14,
+            "target": [
+              0,
+              45.5,
+              8
+            ]
+          },
+          "featured": true,
+          "title": "Flying Base",
+          "builders": [
+            "_CosmicNomad_"
+          ],
+          "file": "builds/_CosmicNomad_/flying-base.glb",
+          "hash": "be29cbad",
+          "bytes": 2858136,
+          "light": "46fa8428",
+          "triangles": 76862,
+          "size": [
+            47,
+            89,
+            57
+          ]
+        },
+        {
+          "slug": "groudon",
+          "view": {
+            "azimuth": 45,
+            "elevation": 0,
+            "zoom": 0.85,
+            "target": [
+              3.4,
+              37.7,
+              3.4
+            ]
+          },
+          "title": "Groudon",
+          "builders": [
+            "_CosmicNomad_"
+          ],
+          "file": "builds/_CosmicNomad_/groudon.glb",
+          "hash": "4499d50f",
+          "bytes": 3859352,
+          "light": "46fa8428",
+          "triangles": 148006,
+          "size": [
+            66,
+            79,
+            134
+          ]
+        },
+        {
+          "slug": "japanese-castle",
+          "builders": [
+            "Dsny",
+            "_CosmicNomad_"
+          ],
+          "view": {
+            "azimuth": 141,
+            "elevation": 13,
+            "zoom": 1.25,
+            "target": [
+              -1.5,
+              48,
+              -7.7
+            ]
+          },
+          "title": "Japanese Castle",
+          "file": "builds/Dsny/japanese-castle.glb",
+          "hash": "1f3bc06b",
+          "bytes": 21948748,
+          "light": "46fa8428",
+          "triangles": 1410282,
+          "size": [
+            155,
+            142,
+            153
+          ]
+        },
+        {
+          "slug": "japanese-house",
+          "view": {
+            "azimuth": 59,
+            "elevation": 12,
+            "zoom": 1.23,
+            "target": [
+              14.3,
+              13.4,
+              3.8
+            ]
+          },
+          "title": "Japanese House",
+          "builders": [
+            "_CosmicNomad_"
+          ],
+          "file": "builds/_CosmicNomad_/japanese-house.glb",
+          "hash": "99789bb0",
+          "bytes": 2359296,
+          "light": "46fa8428",
+          "triangles": 45026,
+          "size": [
+            66,
+            27,
+            31
+          ]
+        },
+        {
+          "slug": "thousand-sunny",
+          "view": {
+            "azimuth": -38,
+            "elevation": 8,
+            "zoom": 1.27,
+            "target": [
+              -27.2,
+              59,
+              29.8
+            ]
+          },
+          "title": "Thousand Sunny",
+          "builders": [
+            "_CosmicNomad_"
+          ],
+          "file": "builds/_CosmicNomad_/thousand-sunny.glb",
+          "hash": "dfa89a0b",
+          "bytes": 7118036,
+          "light": "46fa8428",
+          "triangles": 365758,
+          "size": [
+            125,
+            139,
+            59
+          ]
+        }
+      ]
+    },
+    {
+      "username": "TheRealJard",
+      "displayName": "TheRealJard",
+      "skin": "skins/TheRealJard.png",
+      "slim": false,
+      "builds": [
+        {
+          "slug": "greek-forum",
+          "view": {
+            "azimuth": -142,
+            "elevation": 18,
+            "zoom": 1.01,
+            "target": [
+              6,
+              10.2,
+              0.3
+            ]
+          },
+          "featured": true,
+          "title": "Greek Forum",
+          "builders": [
+            "TheRealJard"
+          ],
+          "file": "builds/TheRealJard/greek-forum.glb",
+          "hash": "26634bca",
+          "bytes": 5571248,
+          "light": "46fa8428",
+          "triangles": 277316,
+          "size": [
+            139,
+            31,
+            94
+          ]
+        },
+        {
+          "slug": "colosseum",
+          "title": "Colosseum",
+          "builders": [
+            "Dsny",
+            "TheRealJard"
+          ],
+          "view": {
+            "azimuth": 57,
+            "elevation": 20,
+            "zoom": 1.01,
+            "target": [
+              4.9,
+              18.4,
+              0.7
+            ]
+          },
+          "file": "builds/Dsny/colosseum.glb",
+          "hash": "5bc5fa7c",
+          "bytes": 21285412,
+          "light": "46fa8428",
+          "triangles": 1431872,
+          "size": [
+            194,
+            61,
+            160
+          ]
+        },
+        {
+          "slug": "iron-farm",
+          "builders": [
+            "jon_with_no_n",
+            "TheRealJard"
+          ],
+          "view": {
+            "azimuth": -71,
+            "elevation": 21,
+            "zoom": 1.04,
+            "target": [
+              -0.6,
+              20.3,
+              -0.3
+            ]
+          },
+          "title": "Iron Farm",
+          "file": "builds/jon_with_no_n/iron-farm.glb",
+          "hash": "8cf8bdd3",
+          "bytes": 2641084,
+          "light": "46fa8428",
+          "triangles": 66754,
+          "size": [
+            56,
+            48,
+            45
+          ]
+        },
+        {
+          "slug": "modern-house",
+          "view": {
+            "azimuth": 169,
+            "elevation": 11,
+            "zoom": 1.22,
+            "target": [
+              2.2,
+              18.9,
+              -20.6
+            ]
+          },
+          "title": "Modern House",
+          "builders": [
+            "TheRealJard"
+          ],
+          "file": "builds/TheRealJard/modern-house.glb",
+          "hash": "028e3906",
+          "bytes": 2429360,
+          "light": "46fa8428",
+          "triangles": 66610,
+          "size": [
+            65,
+            33,
+            59
+          ]
+        },
+        {
+          "slug": "the-capital",
+          "view": {
+            "azimuth": -156,
+            "elevation": 22,
+            "zoom": 1.2,
+            "target": [
+              -6.8,
+              20.7,
+              -3.8
+            ]
+          },
+          "title": "The Capital",
+          "builders": [
+            "TheRealJard"
+          ],
+          "file": "builds/TheRealJard/the-capital.glb",
+          "hash": "40542e6c",
+          "bytes": 2883636,
+          "light": "46fa8428",
+          "triangles": 99832,
+          "size": [
+            65,
+            50,
+            44
+          ]
+        }
+      ]
+    },
+    {
+      "username": "jon_with_no_n",
+      "displayName": "jon_with_no_n",
+      "skin": "skins/jon_with_no_n.png",
+      "slim": false,
+      "builds": [
+        {
+          "slug": "mountain-home",
+          "featured": true,
+          "view": {
+            "azimuth": -145,
+            "elevation": 19,
+            "zoom": 1.1,
+            "target": [
+              1.6,
+              10.8,
+              3.5
+            ]
+          },
+          "title": "Mountain Home",
+          "builders": [
+            "jon_with_no_n"
+          ],
+          "file": "builds/jon_with_no_n/mountain-home.glb",
+          "hash": "1181b1c0",
+          "bytes": 2730368,
+          "light": "46fa8428",
+          "triangles": 71142,
+          "size": [
+            64,
+            34,
+            48
+          ]
+        },
+        {
+          "slug": "chess-arena",
+          "view": {
+            "azimuth": 26,
+            "elevation": 9,
+            "zoom": 1.08,
+            "target": [
+              1.1,
+              10.1,
+              0.7
+            ]
+          },
+          "title": "Chess Arena",
+          "builders": [
+            "jon_with_no_n"
+          ],
+          "file": "builds/jon_with_no_n/chess-arena.glb",
+          "hash": "cce08cd8",
+          "bytes": 1900824,
+          "light": "46fa8428",
+          "triangles": 13818,
+          "size": [
+            25,
+            24,
+            27
+          ]
+        },
+        {
+          "slug": "iron-farm",
+          "builders": [
+            "jon_with_no_n",
+            "TheRealJard"
+          ],
+          "view": {
+            "azimuth": -71,
+            "elevation": 21,
+            "zoom": 1.04,
+            "target": [
+              -0.6,
+              20.3,
+              -0.3
+            ]
+          },
+          "title": "Iron Farm",
+          "file": "builds/jon_with_no_n/iron-farm.glb",
+          "hash": "8cf8bdd3",
+          "bytes": 2641084,
+          "light": "46fa8428",
+          "triangles": 66754,
+          "size": [
+            56,
+            48,
+            45
+          ]
+        }
+      ]
+    },
+    {
+      "username": "mason31",
+      "displayName": "mason31",
+      "skin": "skins/mason31.png",
+      "slim": false,
+      "builds": [
+        {
+          "slug": "the-cobbleplex",
+          "view": {
+            "azimuth": -152,
+            "elevation": 21,
+            "zoom": 1.1,
+            "target": [
+              -4.9,
+              100.6,
+              -8.6
+            ]
+          },
+          "featured": true,
+          "title": "The Cobbleplex",
+          "builders": [
+            "mason31"
+          ],
+          "file": "builds/mason31/the-cobbleplex.glb",
+          "hash": "b54260c5",
+          "bytes": 9202036,
+          "light": "46fa8428",
+          "triangles": 698346,
+          "size": [
+            226,
+            256,
+            179
+          ]
+        },
+        {
+          "slug": "spruce-coaster",
+          "view": {
+            "azimuth": -25,
+            "elevation": 26,
+            "zoom": 1.07,
+            "target": [
+              0.6,
+              25.4,
+              2.3
+            ]
+          },
+          "title": "Spruce Coaster",
+          "builders": [
+            "mason31"
+          ],
+          "file": "builds/mason31/spruce-coaster.glb",
+          "hash": "d20bdb2f",
+          "bytes": 7810240,
+          "light": "46fa8428",
+          "triangles": 423640,
+          "size": [
+            133,
+            60,
+            81
+          ]
+        }
+      ]
+    },
+    {
+      "username": "ingusbingus",
+      "displayName": "ingusbingus",
+      "skin": "skins/ingusbingus.png",
+      "slim": false,
+      "builds": [
+        {
+          "slug": "tower",
+          "view": {
+            "azimuth": 22,
+            "elevation": 28,
+            "zoom": 1.1,
+            "target": [
+              5.6,
+              61.2,
+              2.1
+            ]
+          },
+          "featured": true,
+          "title": "Tower",
+          "builders": [
+            "ingusbingus"
+          ],
+          "file": "builds/ingusbingus/tower.glb",
+          "hash": "2d3bbb40",
+          "bytes": 6607484,
+          "light": "46fa8428",
+          "triangles": 354874,
+          "size": [
+            111,
+            145,
+            85
+          ]
+        }
+      ]
+    },
+    {
+      "username": "jw01",
+      "displayName": "jw01",
+      "skin": "skins/jw01.png",
+      "slim": false,
+      "builds": [
+        {
+          "slug": "underwater-base",
+          "view": {
+            "azimuth": -139,
+            "elevation": 28,
+            "zoom": 1.03
+          },
+          "title": "Underwater Base",
+          "builders": [
+            "jw01"
+          ],
+          "file": "builds/jw01/underwater-base.glb",
+          "hash": "f1f2c7bd",
+          "bytes": 2945136,
+          "light": "46fa8428",
+          "triangles": 87160,
+          "size": [
+            70,
+            28,
+            35
+          ]
+        }
+      ]
+    }
+  ]
+}
